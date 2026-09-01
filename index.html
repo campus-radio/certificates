@@ -18,7 +18,7 @@
     <!-- Firebase SDK Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAIY5X7oUALJjO4CI__wegB0ObnOl6A65Y",
@@ -31,6 +31,18 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // Check Firestore to ensure the ID is 100% unique
+        window.checkCertExists = async function(certId) {
+            try {
+                const docRef = doc(db, "certificates", certId);
+                const docSnap = await getDoc(docRef);
+                return docSnap.exists();
+            } catch (e) {
+                console.warn("Could not check duplicate in Firestore:", e);
+                return false;
+            }
+        };
 
         window.saveCertificateToFirestore = async function(certData) {
             try {
@@ -165,6 +177,12 @@
             gap: 0.5rem;
         }
 
+        .form-row-locked {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.5rem;
+        }
+
         .form-section-subtitle {
             font-size: 0.82rem;
             font-weight: 700;
@@ -197,11 +215,38 @@
             background: #fff;
         }
 
+        input[readonly] {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-family: monospace;
+            font-weight: 700;
+            cursor: not-allowed;
+            border-color: #cbd5e1;
+        }
+
         input:focus,
         select:focus,
         textarea:focus {
             outline: 2px solid var(--brand-orange);
             border-color: transparent;
+        }
+
+        .btn-regen {
+            padding: 0.5rem 0.85rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #334155;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .btn-regen:hover {
+            background: #e2e8f0;
+            color: #0f172a;
         }
 
         .sig-section-box {
@@ -456,6 +501,7 @@
             color: #64748b;
             letter-spacing: 0.3px;
             margin-top: 1px;
+            font-weight: 700;
         }
 
         /* Award Title */
@@ -644,9 +690,14 @@
                         </select>
                     </div>
 
+                    <!-- Read-Only Auto-Generated Unique Serial Number -->
                     <div class="form-group">
-                        <label for="certNumber">Certificate Number / ID</label>
-                        <input type="text" id="certNumber" value="CR-2026-9284" oninput="runPipeline()" required>
+                        <label for="certNumber">Certificate Serial Number (Auto-Generated & Unique)</label>
+                        <div class="form-row-locked">
+                            <input type="text" id="certNumber" value="IKCR-2026-0001" readonly>
+                            <button type="button" class="btn-regen" onclick="generateNewCertId()" title="Generate new unique random serial">⟳ New ID</button>
+                        </div>
+                        <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">🔒 Format: <code>IKCR-YYYY-ABCD</code> (Auto-verified against database duplicates)</span>
                     </div>
 
                     <div class="form-group">
@@ -680,7 +731,7 @@
 
                     <div class="form-group">
                         <label for="issueDate">Issuance Date</label>
-                        <input type="date" id="issueDate" oninput="runPipeline()">
+                        <input type="date" id="issueDate" oninput="handleDateChange()">
                     </div>
 
                     <!-- SIGNATORY 1 -->
@@ -797,7 +848,7 @@
                             <div class="cert-header-verify">
                                 <div class="cert-header-verify-label" id="docVerifyText">To verify certificate,<br>scan the QR:</div>
                                 <div id="certQrCode"></div>
-                                <div class="cert-header-verify-id" id="docCertId">CR-2026-9284</div>
+                                <div class="cert-header-verify-id" id="docCertId">IKCR-2026-0001</div>
                             </div>
                         </div>
 
@@ -822,7 +873,7 @@
 
                         <!-- Signatures & Date Row -->
                         <div class="cert-bottom-row">
-                            <!-- Date of Issue Column styled identically to Signatories -->
+                            <!-- Date of Issue Column -->
                             <div class="cert-date-col">
                                 <div class="cert-date-slot">
                                     <span class="cert-date-val" id="docIssueDate">01 Sept 2026</span>
@@ -850,6 +901,56 @@
     </main>
 
     <script>
+        // Track generated digits during this session
+        let currentRandomDigits = '';
+
+        function getRandomFourDigits() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
+        }
+
+        function getSelectedYear() {
+            const dateVal = document.getElementById('issueDate').value;
+            if (dateVal) {
+                const parts = dateVal.split('-');
+                if (parts.length === 3) return parts[0];
+            }
+            return new Date().getFullYear().toString();
+        }
+
+        async function generateNewCertId() {
+            const year = getSelectedYear();
+            let uniqueFound = false;
+            let candidateId = '';
+            let attempts = 0;
+
+            // Roll four random digits and confirm uniqueness against database
+            while (!uniqueFound && attempts < 10) {
+                attempts++;
+                currentRandomDigits = getRandomFourDigits();
+                candidateId = `IKCR-${year}-${currentRandomDigits}`;
+                
+                if (window.checkCertExists) {
+                    const exists = await window.checkCertExists(candidateId);
+                    if (!exists) uniqueFound = true;
+                } else {
+                    uniqueFound = true;
+                }
+            }
+
+            document.getElementById('certNumber').value = candidateId;
+            runPipeline();
+        }
+
+        function handleDateChange() {
+            // Update year component of certificate number while preserving or rolling fresh digits
+            const year = getSelectedYear();
+            if (!currentRandomDigits) {
+                currentRandomDigits = getRandomFourDigits();
+            }
+            document.getElementById('certNumber').value = `IKCR-${year}-${currentRandomDigits}`;
+            runPipeline();
+        }
+
         function applyLogoData(base64Data) {
             const lg = document.getElementById('certLogoImg');
             if (lg) {
@@ -1082,7 +1183,7 @@
             if (!certTypeEl || !certNumberEl) return;
 
             const type = certTypeEl.value;
-            const certNum = certNumberEl.value.trim() || 'CR-2026-9284';
+            const certNum = certNumberEl.value.trim() || `IKCR-2026-${getRandomFourDigits()}`;
             const verifyText = verifyInstructionEl ? verifyInstructionEl.value.trim() : 'To verify certificate, scan the QR:';
             const name = recipientNameEl ? (recipientNameEl.value || 'Recipient Name') : 'Recipient Name';
             const citation = eventTenureEl ? eventTenureEl.value : '';
@@ -1164,7 +1265,7 @@
             const certHashVal = document.getElementById('certHashVal');
             if (certHashVal) certHashVal.textContent = hash;
 
-            // Generate clean URL targeting verify.html with only the ID
+            // Generate clean URL targeting verify.html with only the unique ID
             const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/verify.html');
             const verifyUrl = `${baseUrl}?id=${encodeURIComponent(certNum)}`;
 
@@ -1206,7 +1307,15 @@
                 if (btn) btn.disabled = true;
                 if (btnLabel) btnLabel.textContent = "Registering & Rendering PDF...";
 
-                const certData = await runPipeline();
+                // Ensure final uniqueness check before saving
+                let certData = await runPipeline();
+                if (window.checkCertExists) {
+                    const exists = await window.checkCertExists(certData.id);
+                    if (exists) {
+                        await generateNewCertId();
+                        certData = await runPipeline();
+                    }
+                }
 
                 // 1. Save to Firebase Firestore
                 if (window.saveCertificateToFirestore) {
@@ -1243,6 +1352,9 @@
 
                 pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
                 pdf.save(filename);
+
+                // Auto-generate next serial ready for the next participant
+                setTimeout(generateNewCertId, 300);
             } catch (err) {
                 console.error("PDF Export Error:", err);
                 alert("Download failed: " + (err.message || err));
@@ -1257,6 +1369,8 @@
             if (issueDateEl && !issueDateEl.value) {
                 issueDateEl.valueAsDate = new Date();
             }
+            currentRandomDigits = getRandomFourDigits();
+            document.getElementById('certNumber').value = `IKCR-${getSelectedYear()}-${currentRandomDigits}`;
             resizeCanvases();
             runPipeline();
         }
