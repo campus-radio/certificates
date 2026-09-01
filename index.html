@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Management & Digital Sign Pipeline | IISER Kolkata Campus Radio</title>
+    <!-- Standalone jsPDF and html2canvas for robust, high-res direct conversion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --brand-orange: #f95724;
+            --brand-orange-dark: #dc3e0f;
+            --brand-dark: #18181b;
+            --brand-slate: #3f3f46;
+            --brand-light: #fafaf9;
+            --bg-page: #f4f4f5;
+            --bg-card: #ffffff;
+            --text-dark: #09090b;
+            --text-muted: #71717a;
+            --border: #e4e4e7;
+            --success: #15803d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--brand-dark);
+            color: #ffffff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--brand-orange);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-brand img {
+            height: 38px;
+            width: auto;
+        }
+
+        .header-brand h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header-brand p {
+            font-size: 0.78rem;
+            color: #a1a1aa;
+        }
+
+        .nav-back {
+            color: #e4e4e7;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .nav-back:hover {
+            background: var(--brand-orange);
+            border-color: var(--brand-orange);
+            color: #fff;
+        }
+
+        main {
+            max-width: 1480px;
+            width: 100%;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 440px 1fr;
+            gap: 1.75rem;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.4rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .panel-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1.1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge-live {
+            background: rgba(249, 87, 36, 0.1);
+            color: var(--brand-orange);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 0.85rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--brand-dark);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.5rem 0.65rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.88rem;
+            color: var(--text-dark);
+            background: #fff;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid var(--brand-orange);
+            border-color: transparent;
+        }
+
+        .sig-section-box {
+            border: 1px solid var(--border);
+            background: #fafaf9;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.4rem;
+        }
+
+        .sig-tabs {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sig-tab-btn {
+            flex: 1;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.5rem;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .sig-tab-btn.active {
+            background: var(--brand-dark);
+            color: #fff;
+            border-color: var(--brand-dark);
+        }
+
+        #sig-canvas {
+            border: 1px dashed #cbd5e1;
+            background: #ffffff;
+            border-radius: 4px;
+            cursor: crosshair;
+            display: block;
+            width: 100%;
+            touch-action: none;
+        }
+
+        .sig-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.35rem;
+        }
+
+        .btn-mini {
+            font-size: 0.72rem;
+            padding: 0.25rem 0.5rem;
+            background: #e4e4e7;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .crypto-meta-badge {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            padding: 0.55rem;
+            border-radius: 6px;
+            margin-top: 0.75rem;
+            font-size: 0.7rem;
+            color: #9a3412;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .btn-download {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--brand-orange);
+            color: #fff;
+            margin-top: 1.1rem;
+            transition: background 0.15s ease;
+        }
+
+        .btn-download:hover {
+            background: var(--brand-orange-dark);
+        }
+
+        .btn-download:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        /* Certificate Live Preview Container */
+        .preview-pane {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .preview-controls {
+            width: 100%;
+            max-width: 860px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        #certToExport {
+            width: 860px;
+            height: 608px;
+            background: #ffffff;
+            border: 10px solid #18181b;
+            outline: 3px solid #f95724;
+            outline-offset: -7px;
+            padding: 2.2rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .corner-accent {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border-color: #f95724;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .corner-tl {
+            top: 12px;
+            left: 12px;
+            border-top: 2.5px solid #f95724;
+            border-left: 2.5px solid #f95724;
+        }
+
+        .corner-tr {
+            top: 12px;
+            right: 12px;
+            border-top: 2.5px solid #f95724;
+            border-right: 2.5px solid #f95724;
+        }
+
+        .corner-bl {
+            bottom: 12px;
+            left: 12px;
+            border-bottom: 2.5px solid #f95724;
+            border-left: 2.5px solid #f95724;
+        }
+
+        .corner-br {
+            bottom: 12px;
+            right: 12px;
+            border-bottom: 2.5px solid #f95724;
+            border-right: 2.5px solid #f95724;
+        }
+
+        .cert-watermark-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: auto;
+            opacity: 0.055;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+        }
+
+        .cert-top-bar {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .cert-logo-img {
+            height: 64px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .cert-titles-wrapper {
+            text-align: left;
+        }
+
+        .cert-inst-name {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            color: #52525b;
+            text-transform: uppercase;
+        }
+
+        .cert-station-name {
+            font-size: 1.35rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            color: var(--brand-dark);
+            line-height: 1.1;
+        }
+
+        .cert-station-name span {
+            color: var(--brand-orange);
+        }
+
+        .cert-award-type-badge {
+            position: relative;
+            z-index: 1;
+            display: inline-block;
+            margin: 0.5rem auto 0;
+            padding: 0.25rem 2rem;
+            border-top: 1.5px solid var(--brand-orange);
+            border-bottom: 1.5px solid var(--brand-orange);
+        }
+
+        .cert-award-type-badge h2 {
+            font-size: 1.5rem;
+            font-family: Georgia, "Times New Roman", serif;
+            letter-spacing: 1px;
+            color: var(--brand-dark);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .cert-body {
+            position: relative;
+            z-index: 1;
+            margin: 0.5rem 0;
+        }
+
+        .cert-body .cert-present {
+            font-style: italic;
+            color: #71717a;
+            font-size: 0.88rem;
+            letter-spacing: 0.5px;
+        }
+
+        .cert-body .cert-name {
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: var(--brand-orange);
+            display: inline-block;
+            padding: 0.15rem 1.8rem;
+            margin: 0.25rem 0;
+            font-family: Georgia, serif;
+            letter-spacing: 0.5px;
+            border-bottom: 1.5px solid #d4d4d8;
+        }
+
+        .cert-body .cert-roll {
+            font-size: 0.8rem;
+            color: #52525b;
+            font-weight: 600;
+        }
+
+        .cert-body .cert-text {
+            font-size: 0.9rem;
+            line-height: 1.55;
+            color: #27272a;
+            max-width: 650px;
+            margin: 0.5rem auto 0;
+        }
+
+        .cert-footer {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 0.4rem;
+            padding: 0 0.5rem;
+        }
+
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 175px;
+        }
+
+        .sig-container-view {
+            height: 48px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sig-container-view img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .footer-line {
+            width: 100%;
+            border-top: 1.5px solid #18181b;
+            margin-top: 0.2rem;
+        }
+
+        .footer-caption {
+            font-size: 0.72rem;
+            color: #71717a;
+            margin-top: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .qr-audit-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 250px;
+        }
+
+        #certQrCode {
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #certQrCode canvas,
+        #certQrCode img {
+            width: 52px !important;
+            height: 52px !important;
+            image-rendering: pixelated;
+        }
+
+        .qr-audit-box span {
+            font-size: 0.65rem;
+            color: #71717a;
+            margin-top: 0.2rem;
+            font-family: monospace;
+            text-align: center;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-brand">
+            <img id="headerLogoImg" src="https://www.iiserkol.ac.in/~radiok/logo/3-removebg-preview.png"
+                alt="Radio Logo" onerror="this.style.display='none'">
+            <div>
+                <h1>IISER Kolkata Campus Radio</h1>
+                <p>Digital Certificate Authority & Management</p>
+            </div>
+        </div>
+        <a href="/admin/dashboard" class="nav-back">&larr; Back to Dashboard</a>
+    </header>
+
+    <main>
+        <div class="layout-grid">
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Certificate Configuration</span>
+                    <span class="badge-live">PIPELINE READY</span>
+                </div>
+
+                <form id="certForm" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label for="logoUploadInput">Station / Institution Logo & Watermark</label>
+                        <input type="file" id="logoUploadInput" accept="image/png, image/jpeg, image/svg+xml"
+                            onchange="handleLogoUpload(event)">
+                        <span style="font-size: 0.72rem; color: #71717a; margin-top: 3px; display: block;">Upload
+                            PNG/JPEG to update both certificate top logo and central watermark.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="certType">Certificate Classification</label>
+                        <select id="certType" onchange="runPipeline()">
+                            <option value="Certificate of Participation">Certificate of Participation</option>
+                            <option value="Certificate of Achievement">Certificate of Achievement</option>
+                            <option value="Certificate of Appreciation">Certificate of Appreciation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="certNumber">Certificate Number / QR Content</label>
+                        <input type="text" id="certNumber" value="CR-2026-9284" oninput="runPipeline()" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="verifyInstruction">Verify Instruction Text (after "To verify certificate, ")</label>
+                        <input type="text" id="verifyInstruction" value="scan QR code" oninput="runPipeline()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recipientName">Recipient Volunteer Name</label>
+                        <input type="text" id="recipientName" value="John Doe" oninput="runPipeline()" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recipientRoll">IISER-K Roll Number</label>
+                        <input type="text" id="recipientRoll" value="99MS999" oninput="runPipeline()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventTenure">Contribution Citation / Tenure</label>
+                        <textarea id="eventTenure" rows="2"
+                            oninput="runPipeline()">outstanding broadcast hosting and audio production for 'Science & Beats' during the Academic Year 2025–2026</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signatoryTitle">Signatory Title (Leave blank to remove signatory)</label>
+                        <input type="text" id="signatoryTitle" value="Faculty In-Charge / Station Lead"
+                            oninput="runPipeline()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="issueDate">Issuance Date</label>
+                        <input type="date" id="issueDate" oninput="runPipeline()">
+                    </div>
+
+                    <div class="form-group" id="sigSectionGroup">
+                        <label>Signatory Digital Signature</label>
+                        <div class="sig-section-box">
+                            <div class="sig-tabs">
+                                <button type="button" class="sig-tab-btn active" id="tabDraw"
+                                    onclick="setSigTab('draw')">Draw Pad</button>
+                                <button type="button" class="sig-tab-btn" id="tabUpload"
+                                    onclick="setSigTab('upload')">Upload Stamp (PNG)</button>
+                            </div>
+
+                            <div id="drawContainer">
+                                <canvas id="sig-canvas" height="90" width="370"></canvas>
+                                <div class="sig-actions">
+                                    <span style="font-size: 0.72rem; color: #71717a;">Draw signature on pad</span>
+                                    <button type="button" class="btn-mini" onclick="clearCanvas()">Clear</button>
+                                </div>
+                            </div>
+
+                            <div id="uploadContainer" style="display: none;">
+                                <input type="file" id="sigUploadInput" accept="image/png, image/jpeg"
+                                    onchange="handleSigUpload(event)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="crypto-meta-badge">
+                        <div style="font-weight: 700; margin-bottom: 2px;">🔒 SHA-256 Verification Hash:</div>
+                        <div id="certHashVal">Computing SHA-256...</div>
+                    </div>
+
+                    <button type="button" class="btn-download" id="downloadBtn" onclick="downloadSignedPDF()">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+                            <path
+                                d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+                        </svg>
+                        <span id="btnLabel">Download High-Res PDF Certificate</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Preview Pane -->
+            <div class="preview-pane">
+                <div class="preview-controls">
+                    <span>Live Document Layout (A4 Landscape)</span>
+                    <span style="color: var(--brand-orange); font-weight: 600;">● Station Palette Aligned</span>
+                </div>
+
+                <div id="certToExport">
+                    <div class="corner-accent corner-tl"></div>
+                    <div class="corner-accent corner-tr"></div>
+                    <div class="corner-accent corner-bl"></div>
+                    <div class="corner-accent corner-br"></div>
+
+                    <!-- Watermark -->
+                    <img id="certWatermarkImg" src="https://www.iiserkol.ac.in/~radiok/logo/3-removebg-preview.png"
+                        class="cert-watermark-logo" alt="Watermark" crossorigin="anonymous">
+
+                    <div class="cert-top-bar">
+                        <!-- Logo -->
+                        <img id="certLogoImg" src="https://www.iiserkol.ac.in/~radiok/logo/3-removebg-preview.png"
+                            class="cert-logo-img" alt="IISER Kolkata Campus Radio Logo" crossorigin="anonymous">
+                        <div class="cert-titles-wrapper">
+                            <div class="cert-station-name">IISER KOLKATA <span>CAMPUS RADIO</span></div>
+                            <div class="cert-inst-name">SAC Building, IISER Kolkata, Mohanpur 741246</div>
+                        </div>
+                    </div>
+
+                    <div class="cert-award-type-badge">
+                        <h2 id="docCertType">Certificate of Participation</h2>
+                    </div>
+
+                    <div class="cert-body">
+                        <p class="cert-present">This certificate is proudly awarded to</p>
+                        <h3 class="cert-name" id="docName">John Doe</h3>
+                        <p class="cert-roll" id="docRoll">Roll No: 99MS999</p>
+                        <p class="cert-text" id="docCitation">
+                            in sincere recognition of their contribution.
+                        </p>
+                    </div>
+
+                    <div class="cert-footer">
+                        <div class="footer-col" id="colDate">
+                            <span id="docIssueDate" style="font-size: 0.85rem; font-weight: 700; color: #18181b;">15 Aug
+                                2026</span>
+                            <div class="footer-line"></div>
+                            <span class="footer-caption">Date of Issue</span>
+                        </div>
+
+                        <div class="qr-audit-box" id="colQR">
+                            <div id="certQrCode"></div>
+                            <span id="docCertId">ID: CR-2026-9284</span>
+                            <span id="docVerifyText" style="font-size: 0.62rem; color: #71717a; margin-top: 2px;">To
+                                verify certificate, scan QR code</span>
+                        </div>
+
+                        <div class="footer-col" id="colSignatory">
+                            <div class="sig-container-view" id="docSigSlot">
+                                <span style="font-size: 0.72rem; color: #a1a1aa; font-style: italic;">[Digital
+                                    Signature]</span>
+                            </div>
+                            <div class="footer-line"></div>
+                            <span class="footer-caption" id="docSignatoryTitle">Faculty In-Charge / Station Lead</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const LOGO_URL = 'https://www.iiserkol.ac.in/~radiok/logo/3-removebg-preview.png';
+
+        async function preloadLogoAsBase64() {
+            try {
+                const response = await fetch(LOGO_URL, { mode: 'cors' });
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    reader.onloadend = function () {
+                        applyLogoData(reader.result);
+                    };
+                    reader.readAsDataURL(blob);
+                }
+            } catch (err) {
+                console.warn("Direct Base64 conversion bypassed:", err);
+            }
+        }
+
+        function applyLogoData(base64Data) {
+            const wm = document.getElementById('certWatermarkImg');
+            const lg = document.getElementById('certLogoImg');
+            const hdr = document.getElementById('headerLogoImg');
+            if (wm) wm.src = base64Data;
+            if (lg) lg.src = base64Data;
+            if (hdr) hdr.src = base64Data;
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    applyLogoData(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        preloadLogoAsBase64();
+
+        const canvas = document.getElementById('sig-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let activeSignatureData = '';
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width > 0) {
+                const dpr = window.devicePixelRatio || 2;
+                canvas.width = rect.width * dpr;
+                canvas.height = 90 * dpr;
+                canvas.style.width = `${rect.width}px`;
+                canvas.style.height = `90px`;
+                ctx.scale(dpr, dpr);
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 60);
+
+        function getCanvasPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getCanvasPos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getCanvasPos(e);
+            ctx.lineWidth = 2.4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#18181b';
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            e.preventDefault();
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                activeSignatureData = canvas.toDataURL('image/png');
+                applySignatureToDocument(activeSignatureData);
+                runPipeline();
+            }
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        window.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        window.addEventListener('touchend', stopDrawing);
+
+        function clearCanvas() {
+            const dpr = window.devicePixelRatio || 2;
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
+            activeSignatureData = '';
+            document.getElementById('docSigSlot').innerHTML = '<span style="font-size: 0.72rem; color: #a1a1aa; font-style: italic;">[Digital Signature]</span>';
+            runPipeline();
+        }
+
+        function setSigTab(tab) {
+            document.getElementById('tabDraw').classList.toggle('active', tab === 'draw');
+            document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
+            document.getElementById('drawContainer').style.display = tab === 'draw' ? 'block' : 'none';
+            document.getElementById('uploadContainer').style.display = tab === 'upload' ? 'block' : 'none';
+        }
+
+        function handleSigUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    activeSignatureData = e.target.result;
+                    applySignatureToDocument(activeSignatureData);
+                    runPipeline();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function applySignatureToDocument(imgData) {
+            if (imgData) {
+                document.getElementById('docSigSlot').innerHTML = `<img src="${imgData}" alt="Digital Signature" />`;
+            }
+        }
+
+        async function computeSHA256(text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function runPipeline() {
+            const type = document.getElementById('certType').value;
+            const certNum = document.getElementById('certNumber').value.trim() || 'CR-2026-9284';
+            const verifyText = document.getElementById('verifyInstruction').value.trim();
+            const name = document.getElementById('recipientName').value || 'Recipient Name';
+            const roll = document.getElementById('recipientRoll').value;
+            const citation = document.getElementById('eventTenure').value;
+            const sigTitle = document.getElementById('signatoryTitle').value.trim();
+            const dateVal = document.getElementById('issueDate').value;
+
+            document.getElementById('docCertType').textContent = type;
+            document.getElementById('docName').textContent = name;
+            document.getElementById('docRoll').textContent = roll ? `Roll No: ${roll}` : '';
+            document.getElementById('docCitation').textContent = `in sincere recognition of ${citation}`;
+            document.getElementById('docCertId').textContent = `ID: ${certNum}`;
+
+            const fullVerifyText = verifyText ? `To verify certificate, ${verifyText}` : `To verify certificate`;
+            document.getElementById('docVerifyText').textContent = fullVerifyText;
+
+            const sigCol = document.getElementById('colSignatory');
+            if (!sigTitle) {
+                sigCol.style.display = 'none';
+            } else {
+                sigCol.style.display = 'flex';
+                document.getElementById('docSignatoryTitle').textContent = sigTitle;
+            }
+
+            let formattedDate = '15 Aug 2026';
+            if (dateVal) {
+                const parts = dateVal.split('-');
+                if (parts.length === 3) {
+                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                    formattedDate = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                }
+            }
+            document.getElementById('docIssueDate').textContent = formattedDate;
+
+            const auditString = `${certNum}|${name}|${roll}|${type}|${formattedDate}|${activeSignatureData.slice(0, 50)}`;
+            const hash = await computeSHA256(auditString);
+            document.getElementById('certHashVal').textContent = hash;
+
+            const qrContainer = document.getElementById('certQrCode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: certNum,
+                width: 128,
+                height: 128,
+                colorDark: "#f95724",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        async function downloadSignedPDF() {
+            const btn = document.getElementById('downloadBtn');
+            const btnLabel = document.getElementById('btnLabel');
+            const originalText = btnLabel.textContent;
+
+            try {
+                if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+                    throw new Error("Rendering libraries could not be loaded.");
+                }
+
+                btn.disabled = true;
+                btnLabel.textContent = "Rendering Ultra-HD PDF...";
+
+                const element = document.getElementById('certToExport');
+                const recipient = (document.getElementById('recipientName').value || 'Volunteer').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const certType = (document.getElementById('certType').value || 'Certificate').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const filename = `${certType}_${recipient}.pdf`;
+
+                // Render at 3.5x scale with explicit element dimensions and zero offsets
+                const canvasOut = await html2canvas(element, {
+                    scale: 3.5,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: "#ffffff",
+                    width: 860,
+                    height: 608,
+                    x: 0,
+                    y: 0,
+                    scrollX: 0,
+                    scrollY: 0
+                });
+
+                const imgData = canvasOut.toDataURL('image/jpeg', 1.0);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4',
+                    compress: true
+                });
+
+                // A4 Landscape: 297mm x 210mm
+                pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
+                pdf.save(filename);
+            } catch (err) {
+                console.error("PDF Export Error:", err);
+                alert("Download failed: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btnLabel.textContent = originalText;
+            }
+        }
+
+        document.getElementById('issueDate').valueAsDate = new Date();
+        runPipeline();
+    </script>
+</body>
+
+</html>
