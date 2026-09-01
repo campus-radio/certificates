@@ -10,10 +10,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- Google Fonts for typography matching -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -52,12 +52,6 @@
             border-bottom: 3px solid var(--brand-orange);
         }
 
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
         .header-brand h1 {
             font-size: 1.15rem;
             font-weight: 700;
@@ -87,7 +81,7 @@
         }
 
         main {
-            max-width: 1540px;
+            max-width: 1560px;
             width: 100%;
             margin: 1.5rem auto;
             padding: 0 1.5rem;
@@ -96,7 +90,7 @@
 
         .layout-grid {
             display: grid;
-            grid-template-columns: 440px 1fr;
+            grid-template-columns: 460px 1fr;
             gap: 1.75rem;
             align-items: start;
         }
@@ -107,6 +101,8 @@
             border-radius: 8px;
             padding: 1.4rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
         }
 
         .panel-title {
@@ -132,6 +128,24 @@
 
         .form-group {
             margin-bottom: 0.85rem;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 0.5rem;
+        }
+
+        .form-section-subtitle {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--brand-orange-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1rem;
+            margin-bottom: 0.4rem;
+            border-bottom: 1px dashed var(--border);
+            padding-bottom: 0.2rem;
         }
 
         label {
@@ -165,20 +179,20 @@
             border: 1px solid var(--border);
             background: #fafaf9;
             border-radius: 6px;
-            padding: 0.75rem;
-            margin-top: 0.4rem;
+            padding: 0.65rem;
+            margin-top: 0.3rem;
         }
 
         .sig-tabs {
             display: flex;
             gap: 0.4rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
         }
 
         .sig-tab-btn {
             flex: 1;
-            font-size: 0.75rem;
-            padding: 0.35rem 0.5rem;
+            font-size: 0.72rem;
+            padding: 0.3rem 0.4rem;
             border: 1px solid var(--border);
             background: #fff;
             border-radius: 4px;
@@ -192,7 +206,7 @@
             border-color: var(--brand-dark);
         }
 
-        #sig-canvas {
+        .sig-canvas-el {
             border: 1px dashed #cbd5e1;
             background: #ffffff;
             border-radius: 4px;
@@ -206,7 +220,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 0.35rem;
+            margin-top: 0.3rem;
         }
 
         .btn-mini {
@@ -279,7 +293,7 @@
         #certToExport {
             width: 860px;
             height: 608px;
-            background: #fbf9f4; /* Cream white background */
+            background: #fbf9f4;
             border: 2px solid #111111;
             padding: 0;
             display: flex;
@@ -289,64 +303,35 @@
             overflow: hidden;
         }
 
-        /* Left Orange Column */
+        /* Left Panel with PNG from Repository */
         .cert-sidebar {
-            width: 190px;
+            width: 200px;
             height: 100%;
-            background-color: #ff7556;
             border-right: 2px solid #111111;
             position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 1.2rem;
             overflow: hidden;
             flex-shrink: 0;
+            background-color: #ff7556;
         }
 
-        /* 20 / 26 Year Display */
-        .cert-year-badge {
-            width: 54px;
-            height: 84px;
-            background: #ffffff;
-            border-radius: 32px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            line-height: 0.95;
-            font-size: 2rem;
-            font-weight: 900;
-            color: #111111;
-            font-family: 'Montserrat', sans-serif;
-            letter-spacing: -1px;
-            z-index: 5;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-        }
-
-        .cert-sidebar-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .cert-sidebar-img {
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: 2;
+            object-fit: cover;
+            display: block;
         }
 
-        /* Right Content Pane */
+        /* Right Content Area */
         .cert-main-content {
             flex: 1;
-            padding: 1.6rem 2.2rem 1.8rem 2.2rem;
+            padding: 1.3rem 2rem 1.3rem 2rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
         }
 
-        /* Header with Station & QR */
+        /* Header Row */
         .cert-header-row {
             display: flex;
             justify-content: space-between;
@@ -356,59 +341,74 @@
         .cert-header-left {
             display: flex;
             align-items: center;
-            gap: 0.9rem;
+            gap: 1.1rem;
         }
 
+        /* Enlarged Logo */
         .cert-header-logo {
-            height: 56px;
+            height: 80px;
             width: auto;
-            max-width: 80px;
+            max-width: 120px;
             object-fit: contain;
-            display: none;
+            display: block;
         }
 
+        /* Brand Typography */
         .cert-header-station-text {
             display: flex;
             flex-direction: column;
         }
 
-        .cert-header-station-text .inst {
-            font-family: 'Special Elite', monospace, sans-serif;
-            font-size: 1.35rem;
-            font-weight: 700;
+        .cert-header-station-text .station-line1 {
+            font-family: 'Outfit', 'Montserrat', sans-serif;
+            font-size: 1.65rem;
+            font-weight: 900;
             color: #111111;
-            letter-spacing: 0.5px;
-            line-height: 1.1;
+            letter-spacing: 1.2px;
+            line-height: 1.05;
+            text-transform: uppercase;
         }
 
-        .cert-header-station-text .station {
-            font-family: 'Special Elite', monospace, sans-serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: #111111;
-            letter-spacing: 0.5px;
-            line-height: 1.1;
+        .cert-header-station-text .station-line2 {
+            font-family: 'Outfit', 'Montserrat', sans-serif;
+            font-size: 1.65rem;
+            font-weight: 900;
+            color: var(--brand-orange);
+            letter-spacing: 1.2px;
+            line-height: 1.05;
+            text-transform: uppercase;
         }
 
+        .cert-header-station-text .station-sub {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #52525b;
+            letter-spacing: 0.4px;
+            margin-top: 3px;
+            text-transform: uppercase;
+        }
+
+        /* Vertically Stacked QR & Verify Block */
         .cert-header-verify {
             display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 2px;
         }
 
         .cert-header-verify-label {
-            font-size: 0.8rem;
-            color: #64748b;
-            text-align: right;
-            line-height: 1.35;
-            max-width: 155px;
-            margin-top: 2px;
-            font-weight: 400;
+            font-size: 0.62rem;
+            color: #475569;
+            font-weight: 500;
+            line-height: 1.2;
+            max-width: 120px;
+            margin-bottom: 2px;
         }
 
         #certQrCode {
-            width: 68px;
-            height: 68px;
+            width: 58px;
+            height: 58px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -416,45 +416,53 @@
 
         #certQrCode canvas,
         #certQrCode img {
-            width: 68px !important;
-            height: 68px !important;
+            width: 58px !important;
+            height: 58px !important;
             image-rendering: pixelated;
         }
 
-        /* Big Classification Header */
+        .cert-header-verify-id {
+            font-size: 0.6rem;
+            font-family: monospace;
+            color: #64748b;
+            letter-spacing: 0.3px;
+            margin-top: 1px;
+        }
+
+        /* Award Title */
         .cert-award-type-title {
             font-family: 'Anton', 'Montserrat', sans-serif;
-            font-size: 2.55rem;
+            font-size: 2.45rem;
             font-weight: 900;
             color: #111111;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin-top: 0.4rem;
+            margin-top: 0.1rem;
             line-height: 1;
         }
 
-        /* Recipient Section */
+        /* Recipient Name and Roll Section */
         .cert-recipient-section {
             display: flex;
             flex-direction: column;
         }
 
         .cert-lead-text {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #64748b;
             font-weight: 400;
-            margin-bottom: 0.35rem;
+            margin-bottom: 0.2rem;
         }
 
         .cert-recipient-name-wrap {
-            border-top: 1.5px solid #27272a;
-            border-bottom: 1.5px solid #27272a;
-            padding: 0.4rem 0;
-            margin-bottom: 0.45rem;
+            border-top: 1.5px solid #111111;
+            border-bottom: 1.5px solid #111111;
+            padding: 0.3rem 0;
+            margin-bottom: 0.35rem;
         }
 
         .cert-recipient-name {
-            font-size: 2.25rem;
+            font-size: 2.2rem;
             font-weight: 900;
             color: #09090b;
             font-family: 'Montserrat', sans-serif;
@@ -464,64 +472,86 @@
 
         .cert-roll-number {
             text-align: right;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: #27272a;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
         /* Citation Body */
         .cert-citation-text {
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.9rem;
+            line-height: 1.48;
             color: #27272a;
             font-weight: 400;
             max-width: 580px;
         }
 
-        /* Bottom Footer Rows */
+        /* Bottom Row with Date & Dual Signatures (Matching Layout) */
         .cert-bottom-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
+            gap: 1.25rem;
         }
 
+        /* Matching Date Column */
         .cert-date-col {
             display: flex;
             flex-direction: column;
-            width: 175px;
+            width: 165px;
+            flex-shrink: 0;
+        }
+
+        .cert-date-slot {
+            height: 42px;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            border-bottom: 1.5px solid #111111;
+            padding-bottom: 4px;
         }
 
         .cert-date-val {
-            font-size: 1rem;
+            font-size: 0.92rem;
             font-weight: 700;
             color: #111111;
-            padding-bottom: 0.3rem;
-            border-bottom: 1.5px solid #27272a;
-            min-height: 24px;
+            text-align: center;
+            letter-spacing: 0.2px;
         }
 
         .cert-date-lbl {
-            font-size: 0.88rem;
+            font-size: 0.76rem;
             color: #64748b;
-            margin-top: 0.35rem;
-            font-weight: 400;
+            margin-top: 0.3rem;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Dual Signatures Container */
+        .cert-signatories-wrapper {
+            display: flex;
+            gap: 1.25rem;
+            flex: 1;
+            justify-content: flex-end;
         }
 
         .cert-sign-col {
             display: flex;
             flex-direction: column;
-            width: 290px;
+            width: 185px;
         }
 
         .cert-sign-slot {
-            height: 48px;
+            height: 42px;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1.5px solid #27272a;
+            border-bottom: 1.5px solid #111111;
         }
 
         .cert-sign-slot img {
@@ -531,11 +561,12 @@
         }
 
         .cert-sign-title {
-            font-size: 0.88rem;
+            font-size: 0.76rem;
             color: #64748b;
-            margin-top: 0.35rem;
-            font-weight: 400;
+            margin-top: 0.3rem;
+            font-weight: 500;
             text-align: center;
+            line-height: 1.2;
         }
     </style>
 </head>
@@ -562,10 +593,17 @@
 
                 <form id="certForm" onsubmit="event.preventDefault();">
                     <div class="form-group">
-                        <label for="logoUploadInput">Upload Station / Institution Logo</label>
+                        <label for="logoUploadInput">Station Logo (Default: ./logo.png)</label>
                         <input type="file" id="logoUploadInput" accept="image/png, image/jpeg, image/svg+xml"
                             onchange="handleLogoUpload(event)">
-                        <span style="font-size: 0.72rem; color: #71717a; margin-top: 3px; display: block;">Upload PNG/JPEG to display beside station header title.</span>
+                        <span style="font-size: 0.72rem; color: #71717a; margin-top: 3px; display: block;">Loads <code>./logo.png</code> from repo or choose a replacement file.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sidebarUploadInput">Left Sidebar Panel (Default: ./sidebar.png)</label>
+                        <input type="file" id="sidebarUploadInput" accept="image/png, image/jpeg"
+                            onchange="handleSidebarUpload(event)">
+                        <span style="font-size: 0.72rem; color: #71717a; margin-top: 3px; display: block;">Loads <code>./sidebar.png</code> from repo or choose a replacement file.</span>
                     </div>
 
                     <div class="form-group">
@@ -578,7 +616,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="certNumber">Certificate Number / QR Content</label>
+                        <label for="certNumber">Certificate Number / ID</label>
                         <input type="text" id="certNumber" value="CR-2026-9284" oninput="runPipeline()" required>
                     </div>
 
@@ -592,9 +630,17 @@
                         <input type="text" id="recipientName" value="Rishiraj Chatterjee" oninput="runPipeline()" required>
                     </div>
 
+                    <!-- Participant Identifier (Roll Number or College Name) -->
                     <div class="form-group">
-                        <label for="recipientRoll">IISER-K Roll Number</label>
-                        <input type="text" id="recipientRoll" value="25MS191" oninput="runPipeline()">
+                        <label>Participant Identification Type</label>
+                        <div class="form-row-2">
+                            <select id="idTypeSelect" onchange="handleIdTypeChange()">
+                                <option value="roll">Roll Number</option>
+                                <option value="college">College / Institute</option>
+                                <option value="custom">Custom Prefix</option>
+                            </select>
+                            <input type="text" id="recipientIdVal" value="25MS191" oninput="runPipeline()" placeholder="Enter roll or college name">
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -604,37 +650,72 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="signatoryTitle">Signatory Title (Leave blank to remove signatory)</label>
-                        <input type="text" id="signatoryTitle" value="Faculty In-Charge/ Station Lead"
-                            oninput="runPipeline()">
-                    </div>
-
-                    <div class="form-group">
                         <label for="issueDate">Issuance Date</label>
                         <input type="date" id="issueDate" oninput="runPipeline()">
                     </div>
 
-                    <div class="form-group" id="sigSectionGroup">
-                        <label>Signatory Digital Signature</label>
+                    <!-- SIGNATORY 1 -->
+                    <div class="form-section-subtitle">Signatory 1 (Left)</div>
+                    <div class="form-group">
+                        <label for="signatoryTitle1">Signatory 1 Title</label>
+                        <input type="text" id="signatoryTitle1" value="Faculty In-Charge / Station Lead"
+                            oninput="runPipeline()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Signatory 1 Signature</label>
                         <div class="sig-section-box">
                             <div class="sig-tabs">
-                                <button type="button" class="sig-tab-btn active" id="tabDraw"
-                                    onclick="setSigTab('draw')">Draw Pad</button>
-                                <button type="button" class="sig-tab-btn" id="tabUpload"
-                                    onclick="setSigTab('upload')">Upload Stamp (PNG)</button>
+                                <button type="button" class="sig-tab-btn active" id="tabDraw1"
+                                    onclick="setSigTab(1, 'draw')">Draw Pad</button>
+                                <button type="button" class="sig-tab-btn" id="tabUpload1"
+                                    onclick="setSigTab(1, 'upload')">Upload Stamp (PNG)</button>
                             </div>
 
-                            <div id="drawContainer">
-                                <canvas id="sig-canvas" height="90" width="370"></canvas>
+                            <div id="drawContainer1">
+                                <canvas id="sig-canvas-1" class="sig-canvas-el" height="80" width="370"></canvas>
                                 <div class="sig-actions">
-                                    <span style="font-size: 0.72rem; color: #71717a;">Draw signature on pad</span>
-                                    <button type="button" class="btn-mini" onclick="clearCanvas()">Clear</button>
+                                    <span style="font-size: 0.72rem; color: #71717a;">Draw signature 1</span>
+                                    <button type="button" class="btn-mini" onclick="clearCanvas(1)">Clear</button>
                                 </div>
                             </div>
 
-                            <div id="uploadContainer" style="display: none;">
-                                <input type="file" id="sigUploadInput" accept="image/png, image/jpeg"
-                                    onchange="handleSigUpload(event)">
+                            <div id="uploadContainer1" style="display: none;">
+                                <input type="file" id="sigUploadInput1" accept="image/png, image/jpeg"
+                                    onchange="handleSigUpload(event, 1)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SIGNATORY 2 -->
+                    <div class="form-section-subtitle">Signatory 2 (Right)</div>
+                    <div class="form-group">
+                        <label for="signatoryTitle2">Signatory 2 Title (Leave blank to remove)</label>
+                        <input type="text" id="signatoryTitle2" value="Student Convener / Coordinator"
+                            oninput="runPipeline()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Signatory 2 Signature</label>
+                        <div class="sig-section-box">
+                            <div class="sig-tabs">
+                                <button type="button" class="sig-tab-btn active" id="tabDraw2"
+                                    onclick="setSigTab(2, 'draw')">Draw Pad</button>
+                                <button type="button" class="sig-tab-btn" id="tabUpload2"
+                                    onclick="setSigTab(2, 'upload')">Upload Stamp (PNG)</button>
+                            </div>
+
+                            <div id="drawContainer2">
+                                <canvas id="sig-canvas-2" class="sig-canvas-el" height="80" width="370"></canvas>
+                                <div class="sig-actions">
+                                    <span style="font-size: 0.72rem; color: #71717a;">Draw signature 2</span>
+                                    <button type="button" class="btn-mini" onclick="clearCanvas(2)">Clear</button>
+                                </div>
+                            </div>
+
+                            <div id="uploadContainer2" style="display: none;">
+                                <input type="file" id="sigUploadInput2" accept="image/png, image/jpeg"
+                                    onchange="handleSigUpload(event, 2)">
                             </div>
                         </div>
                     </div>
@@ -665,40 +746,9 @@
 
                 <!-- Export Document Container -->
                 <div id="certToExport">
-                    <!-- Sidebar Banner with Retro Shapes -->
+                    <!-- Left Sidebar loaded from repository PNG -->
                     <div class="cert-sidebar">
-                        <div class="cert-year-badge">
-                            <span id="docYearTop">20</span>
-                            <span id="docYearBottom">26</span>
-                        </div>
-                        <!-- Decorative Retro Vector Pattern -->
-                        <svg class="cert-sidebar-svg" viewBox="0 0 190 608" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Star 1 -->
-                            <path d="M135 70 C135 80 145 80 145 80 C145 80 135 80 135 90 C135 80 125 80 125 80 C125 80 135 80 135 70 Z" fill="#2d3748"/>
-                            <!-- White Pill Shapes / Clouds -->
-                            <ellipse cx="140" cy="170" rx="45" ry="68" fill="#ffffff" />
-                            <circle cx="85" cy="225" r="48" fill="#ffffff" />
-                            <ellipse cx="148" cy="390" rx="38" ry="60" fill="#ffffff" />
-                            <ellipse cx="85" cy="580" rx="45" ry="60" fill="#ffffff" />
-                            <ellipse cx="185" cy="800" rx="50" ry="70" fill="#ffffff" />
-                            <circle cx="105" cy="350" r="54" fill="#ffffff" />
-
-                            <!-- Star 2 -->
-                            <path d="M78 240 C78 260 98 260 98 260 C98 260 78 260 78 280 C78 260 58 260 58 260 C58 260 78 260 78 240 Z" fill="#2d3748"/>
-                            
-                            <!-- Star 3 -->
-                            <path d="M245 315 C245 330 260 330 260 330 C260 330 245 330 245 345 C245 330 230 330 230 330 C230 330 245 330 245 315 Z" fill="#2d3748" transform="translate(-100, 0)"/>
-
-                            <!-- Star 4 -->
-                            <path d="M85 530 C85 550 105 550 105 550 C105 550 85 550 85 570 C85 550 65 550 65 550 C65 550 85 550 85 530 Z" fill="#2d3748"/>
-
-                            <!-- Black Oval Wireframes -->
-                            <ellipse cx="120" cy="200" rx="72" ry="120" stroke="#111111" stroke-width="1.8" transform="rotate(-30 120 200)" fill="none"/>
-                            <ellipse cx="78" cy="320" rx="55" ry="105" stroke="#111111" stroke-width="1.8" transform="rotate(35 78 320)" fill="none"/>
-                            <ellipse cx="130" cy="435" rx="55" ry="18" stroke="#111111" stroke-width="1.8" transform="rotate(-8 130 435)" fill="none"/>
-                            <ellipse cx="135" cy="510" rx="55" ry="18" stroke="#111111" stroke-width="1.8" transform="rotate(2 135 510)" fill="none"/>
-                            <ellipse cx="85" cy="625" rx="52" ry="100" stroke="#111111" stroke-width="1.8" transform="rotate(62 85 625)" fill="none"/>
-                        </svg>
+                        <img id="certSidebarImg" class="cert-sidebar-img" src="./sidebar.png" alt="Sidebar Graphic" crossorigin="anonymous" onerror="this.style.display='none'">
                     </div>
 
                     <!-- Right Certificate Body -->
@@ -706,15 +756,19 @@
                         <!-- Top Header -->
                         <div class="cert-header-row">
                             <div class="cert-header-left">
-                                <img id="certLogoImg" class="cert-header-logo" alt="Campus Radio Logo">
+                                <img id="certLogoImg" class="cert-header-logo" src="./logo.png" alt="Campus Radio Logo" crossorigin="anonymous" onerror="this.style.display='none'">
                                 <div class="cert-header-station-text">
-                                    <div class="inst">IISER KOLKATA</div>
-                                    <div class="station">CAMPUS RADIO</div>
+                                    <div class="station-line1">IISER KOLKATA</div>
+                                    <div class="station-line2">CAMPUS RADIO</div>
+                                    <div class="station-sub">SAC Building, IISER Kolkata, Mohanpur 741246</div>
                                 </div>
                             </div>
+
+                            <!-- QR and Verification Stacked -->
                             <div class="cert-header-verify">
                                 <div class="cert-header-verify-label" id="docVerifyText">To verify certificate,<br>scan the QR:</div>
                                 <div id="certQrCode"></div>
+                                <div class="cert-header-verify-id" id="docCertId">CR-2026-9284</div>
                             </div>
                         </div>
 
@@ -723,7 +777,7 @@
                             CERTIFICATE OF PARTICIPATION
                         </div>
 
-                        <!-- Recipient Name and Roll -->
+                        <!-- Recipient Name and Roll/College -->
                         <div class="cert-recipient-section">
                             <div class="cert-lead-text">This certificate is proudly awarded to:</div>
                             <div class="cert-recipient-name-wrap">
@@ -739,15 +793,25 @@
 
                         <!-- Signatures & Date Row -->
                         <div class="cert-bottom-row">
+                            <!-- Date of Issue Column styled identically to Signatories -->
                             <div class="cert-date-col">
-                                <div class="cert-date-val" id="docIssueDate">01 Sept 2026</div>
+                                <div class="cert-date-slot">
+                                    <span class="cert-date-val" id="docIssueDate">01 Sept 2026</span>
+                                </div>
                                 <div class="cert-date-lbl">Date of issue</div>
                             </div>
-                            <div class="cert-sign-col" id="colSignatory">
-                                <div class="cert-sign-slot" id="docSigSlot">
-                                    <span style="font-size: 0.72rem; color: #a1a1aa; font-style: italic;">[Digital Signature]</span>
+
+                            <!-- Dual Signatories Slot -->
+                            <div class="cert-signatories-wrapper">
+                                <div class="cert-sign-col" id="colSignatory1">
+                                    <div class="cert-sign-slot" id="docSigSlot1"></div>
+                                    <div class="cert-sign-title" id="docSignatoryTitle1">Faculty In-Charge / Station Lead</div>
                                 </div>
-                                <div class="cert-sign-title" id="docSignatoryTitle">Faculty In-Charge/ Station Lead</div>
+
+                                <div class="cert-sign-col" id="colSignatory2">
+                                    <div class="cert-sign-slot" id="docSigSlot2"></div>
+                                    <div class="cert-sign-title" id="docSignatoryTitle2">Student Convener / Coordinator</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -776,115 +840,188 @@
             }
         }
 
-        const canvas = document.getElementById('sig-canvas');
-        const ctx = canvas ? canvas.getContext('2d') : null;
-        let isDrawing = false;
-        let activeSignatureData = '';
-
-        function resizeCanvas() {
-            if (!canvas || !ctx) return;
-            const rect = canvas.getBoundingClientRect();
-            if (rect.width > 0) {
-                const dpr = window.devicePixelRatio || 2;
-                canvas.width = rect.width * dpr;
-                canvas.height = 90 * dpr;
-                canvas.style.width = `${rect.width}px`;
-                canvas.style.height = `90px`;
-                ctx.scale(dpr, dpr);
+        function applySidebarData(base64Data) {
+            const sb = document.getElementById('certSidebarImg');
+            if (sb) {
+                sb.src = base64Data;
+                sb.style.display = 'block';
             }
         }
 
-        window.addEventListener('resize', resizeCanvas);
-
-        function getCanvasPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
-        }
-
-        function startDrawing(e) {
-            if (!ctx) return;
-            isDrawing = true;
-            const pos = getCanvasPos(e);
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-            e.preventDefault();
-        }
-
-        function draw(e) {
-            if (!isDrawing || !ctx) return;
-            const pos = getCanvasPos(e);
-            ctx.lineWidth = 2.4;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.strokeStyle = '#18181b';
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            e.preventDefault();
-        }
-
-        function stopDrawing() {
-            if (isDrawing) {
-                isDrawing = false;
-                activeSignatureData = canvas.toDataURL('image/png');
-                applySignatureToDocument(activeSignatureData);
-                runPipeline();
+        function handleSidebarUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    applySidebarData(e.target.result);
+                };
+                reader.readAsDataURL(file);
             }
         }
 
-        if (canvas) {
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            window.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('touchstart', startDrawing, { passive: false });
-            canvas.addEventListener('touchmove', draw, { passive: false });
-            window.addEventListener('touchend', stopDrawing);
-        }
+        function handleIdTypeChange() {
+            const select = document.getElementById('idTypeSelect');
+            const input = document.getElementById('recipientIdVal');
+            if (!select || !input) return;
 
-        function clearCanvas() {
-            if (!canvas || !ctx) return;
-            const dpr = window.devicePixelRatio || 2;
-            ctx.save();
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.restore();
-            activeSignatureData = '';
-            const sigSlot = document.getElementById('docSigSlot');
-            if (sigSlot) {
-                sigSlot.innerHTML = '<span style="font-size: 0.72rem; color: #a1a1aa; font-style: italic;">[Digital Signature]</span>';
+            if (select.value === 'roll') {
+                input.placeholder = 'e.g., 25MS191';
+                if (!input.value || input.value.includes('IISER') || input.value.includes('College')) {
+                    input.value = '25MS191';
+                }
+            } else if (select.value === 'college') {
+                input.placeholder = 'e.g., IISER Kolkata / St. Xavier\'s College';
+                if (!input.value || input.value === '25MS191') {
+                    input.value = 'IISER Kolkata';
+                }
+            } else if (select.value === 'custom') {
+                input.placeholder = 'e.g., Affiliation: ABC Institute';
             }
             runPipeline();
         }
 
-        function setSigTab(tab) {
-            const tabDraw = document.getElementById('tabDraw');
-            const tabUpload = document.getElementById('tabUpload');
-            const drawContainer = document.getElementById('drawContainer');
-            const uploadContainer = document.getElementById('uploadContainer');
+        // SIGNATURE 1 CANVAS SETUP
+        const canvas1 = document.getElementById('sig-canvas-1');
+        const ctx1 = canvas1 ? canvas1.getContext('2d') : null;
+        let activeSignatureData1 = '';
+
+        // SIGNATURE 2 CANVAS SETUP
+        const canvas2 = document.getElementById('sig-canvas-2');
+        const ctx2 = canvas2 ? canvas2.getContext('2d') : null;
+        let activeSignatureData2 = '';
+
+        function resizeCanvases() {
+            [canvas1, canvas2].forEach((cv, idx) => {
+                if (!cv) return;
+                const rect = cv.getBoundingClientRect();
+                if (rect.width > 0) {
+                    const dpr = window.devicePixelRatio || 2;
+                    cv.width = rect.width * dpr;
+                    cv.height = 80 * dpr;
+                    cv.style.width = `${rect.width}px`;
+                    cv.style.height = `80px`;
+                    const context = idx === 0 ? ctx1 : ctx2;
+                    if (context) context.scale(dpr, dpr);
+                }
+            });
+        }
+
+        window.addEventListener('resize', resizeCanvases);
+
+        function setupCanvasHandlers(cv, ctx, onEndCallback) {
+            if (!cv || !ctx) return;
+            let drawing = false;
+
+            function getPos(e) {
+                const rect = cv.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function start(e) {
+                drawing = true;
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                e.preventDefault();
+            }
+
+            function move(e) {
+                if (!drawing) return;
+                const pos = getPos(e);
+                ctx.lineWidth = 2.4;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = '#18181b';
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                e.preventDefault();
+            }
+
+            function end() {
+                if (drawing) {
+                    drawing = false;
+                    const data = cv.toDataURL('image/png');
+                    onEndCallback(data);
+                }
+            }
+
+            cv.addEventListener('mousedown', start);
+            cv.addEventListener('mousemove', move);
+            window.addEventListener('mouseup', end);
+            cv.addEventListener('touchstart', start, { passive: false });
+            cv.addEventListener('touchmove', move, { passive: false });
+            window.addEventListener('touchend', end);
+        }
+
+        setupCanvasHandlers(canvas1, ctx1, (data) => {
+            activeSignatureData1 = data;
+            applySignatureToDocument(1, data);
+            runPipeline();
+        });
+
+        setupCanvasHandlers(canvas2, ctx2, (data) => {
+            activeSignatureData2 = data;
+            applySignatureToDocument(2, data);
+            runPipeline();
+        });
+
+        function clearCanvas(num) {
+            const cv = num === 1 ? canvas1 : canvas2;
+            const ctx = num === 1 ? ctx1 : ctx2;
+            if (!cv || !ctx) return;
+
+            const dpr = window.devicePixelRatio || 2;
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, cv.width, cv.height);
+            ctx.restore();
+
+            if (num === 1) {
+                activeSignatureData1 = '';
+                document.getElementById('docSigSlot1').innerHTML = '';
+            } else {
+                activeSignatureData2 = '';
+                document.getElementById('docSigSlot2').innerHTML = '';
+            }
+            runPipeline();
+        }
+
+        function setSigTab(num, tab) {
+            const tabDraw = document.getElementById(`tabDraw${num}`);
+            const tabUpload = document.getElementById(`tabUpload${num}`);
+            const drawContainer = document.getElementById(`drawContainer${num}`);
+            const uploadContainer = document.getElementById(`uploadContainer${num}`);
+
             if (tabDraw) tabDraw.classList.toggle('active', tab === 'draw');
             if (tabUpload) tabUpload.classList.toggle('active', tab === 'upload');
             if (drawContainer) drawContainer.style.display = tab === 'draw' ? 'block' : 'none';
             if (uploadContainer) uploadContainer.style.display = tab === 'upload' ? 'block' : 'none';
         }
 
-        function handleSigUpload(event) {
+        function handleSigUpload(event, num) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    activeSignatureData = e.target.result;
-                    applySignatureToDocument(activeSignatureData);
+                    if (num === 1) {
+                        activeSignatureData1 = e.target.result;
+                        applySignatureToDocument(1, activeSignatureData1);
+                    } else {
+                        activeSignatureData2 = e.target.result;
+                        applySignatureToDocument(2, activeSignatureData2);
+                    }
                     runPipeline();
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        function applySignatureToDocument(imgData) {
-            const sigSlot = document.getElementById('docSigSlot');
+        function applySignatureToDocument(num, imgData) {
+            const sigSlot = document.getElementById(`docSigSlot${num}`);
             if (sigSlot && imgData) {
-                sigSlot.innerHTML = `<img src="${imgData}" alt="Digital Signature" />`;
+                sigSlot.innerHTML = `<img src="${imgData}" alt="Signature ${num}" />`;
             }
         }
 
@@ -905,10 +1042,13 @@
             const certNumberEl = document.getElementById('certNumber');
             const verifyInstructionEl = document.getElementById('verifyInstruction');
             const recipientNameEl = document.getElementById('recipientName');
-            const recipientRollEl = document.getElementById('recipientRoll');
+            const idTypeSelect = document.getElementById('idTypeSelect');
+            const recipientIdVal = document.getElementById('recipientIdVal');
             const eventTenureEl = document.getElementById('eventTenure');
-            const signatoryTitleEl = document.getElementById('signatoryTitle');
             const issueDateEl = document.getElementById('issueDate');
+
+            const signatoryTitle1El = document.getElementById('signatoryTitle1');
+            const signatoryTitle2El = document.getElementById('signatoryTitle2');
 
             if (!certTypeEl || !certNumberEl) return;
 
@@ -916,59 +1056,81 @@
             const certNum = certNumberEl.value.trim() || 'CR-2026-9284';
             const verifyText = verifyInstructionEl ? verifyInstructionEl.value.trim() : 'To verify certificate, scan the QR:';
             const name = recipientNameEl ? (recipientNameEl.value || 'Recipient Name') : 'Recipient Name';
-            const roll = recipientRollEl ? recipientRollEl.value : '';
             const citation = eventTenureEl ? eventTenureEl.value : '';
-            const sigTitle = signatoryTitleEl ? signatoryTitleEl.value.trim() : '';
             const dateVal = issueDateEl ? issueDateEl.value : '';
+
+            // Handle Roll vs College formatting
+            const idType = idTypeSelect ? idTypeSelect.value : 'roll';
+            const rawId = recipientIdVal ? recipientIdVal.value.trim() : '';
+            let formattedIdText = '';
+            if (rawId) {
+                if (idType === 'roll') {
+                    formattedIdText = `Roll Number: ${rawId}`;
+                } else if (idType === 'college') {
+                    formattedIdText = `${rawId}`;
+                } else {
+                    formattedIdText = rawId;
+                }
+            }
+
+            const sigTitle1 = signatoryTitle1El ? signatoryTitle1El.value.trim() : '';
+            const sigTitle2 = signatoryTitle2El ? signatoryTitle2El.value.trim() : '';
 
             const docCertType = document.getElementById('docCertType');
             const docName = document.getElementById('docName');
             const docRoll = document.getElementById('docRoll');
             const docCitation = document.getElementById('docCitation');
             const docVerifyText = document.getElementById('docVerifyText');
-            const sigCol = document.getElementById('colSignatory');
-            const docSignatoryTitle = document.getElementById('docSignatoryTitle');
+            const docCertId = document.getElementById('docCertId');
+
+            const colSig1 = document.getElementById('colSignatory1');
+            const docSignatoryTitle1 = document.getElementById('docSignatoryTitle1');
+            const colSig2 = document.getElementById('colSignatory2');
+            const docSignatoryTitle2 = document.getElementById('docSignatoryTitle2');
+
             const docIssueDate = document.getElementById('docIssueDate');
-            const docYearTop = document.getElementById('docYearTop');
-            const docYearBottom = document.getElementById('docYearBottom');
 
             if (docCertType) docCertType.textContent = type;
             if (docName) docName.textContent = name;
-            if (docRoll) docRoll.textContent = roll ? `Roll Number: ${roll}` : '';
+            if (docRoll) docRoll.textContent = formattedIdText;
             if (docCitation) docCitation.textContent = `in sincere recognition of ${citation}`;
+            if (docCertId) docCertId.textContent = certNum;
 
             if (docVerifyText) {
                 docVerifyText.innerHTML = verifyText.replace(/,\s*/, ',<br>');
             }
 
-            if (sigCol) {
-                if (!sigTitle) {
-                    sigCol.style.opacity = '0';
+            // Signatory 1 Toggle
+            if (colSig1) {
+                if (!sigTitle1) {
+                    colSig1.style.display = 'none';
                 } else {
-                    sigCol.style.opacity = '1';
-                    if (docSignatoryTitle) docSignatoryTitle.textContent = sigTitle;
+                    colSig1.style.display = 'flex';
+                    if (docSignatoryTitle1) docSignatoryTitle1.textContent = sigTitle1;
+                }
+            }
+
+            // Signatory 2 Toggle
+            if (colSig2) {
+                if (!sigTitle2) {
+                    colSig2.style.display = 'none';
+                } else {
+                    colSig2.style.display = 'flex';
+                    if (docSignatoryTitle2) docSignatoryTitle2.textContent = sigTitle2;
                 }
             }
 
             let formattedDate = '01 Sept 2026';
-            let yearFull = '2026';
             if (dateVal) {
                 const parts = dateVal.split('-');
                 if (parts.length === 3) {
                     const d = new Date(parts[0], parts[1] - 1, parts[2]);
                     formattedDate = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                    yearFull = parts[0];
                 }
             }
             if (docIssueDate) docIssueDate.textContent = formattedDate;
 
-            // Update badge digits (e.g., 20 and 26)
-            if (yearFull.length === 4) {
-                if (docYearTop) docYearTop.textContent = yearFull.slice(0, 2);
-                if (docYearBottom) docYearBottom.textContent = yearFull.slice(2, 4);
-            }
-
-            const auditString = `${certNum}|${name}|${roll}|${type}|${formattedDate}|${activeSignatureData.slice(0, 50)}`;
+            const auditString = `${certNum}|${name}|${formattedIdText}|${type}|${formattedDate}|${activeSignatureData1.slice(0, 30)}|${activeSignatureData2.slice(0, 30)}`;
             const hash = await computeSHA256(auditString);
             const certHashVal = document.getElementById('certHashVal');
             if (certHashVal) certHashVal.textContent = hash;
@@ -978,8 +1140,8 @@
                 qrContainer.innerHTML = '';
                 new QRCode(qrContainer, {
                     text: certNum,
-                    width: 68,
-                    height: 68,
+                    width: 58,
+                    height: 58,
                     colorDark: "#111111",
                     colorLight: "#fbf9f4",
                     correctLevel: QRCode.CorrectLevel.H
@@ -1046,7 +1208,7 @@
             if (issueDateEl && !issueDateEl.value) {
                 issueDateEl.valueAsDate = new Date();
             }
-            resizeCanvas();
+            resizeCanvases();
             runPipeline();
         }
 
