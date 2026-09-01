@@ -35,9 +35,20 @@ jobs:
         env:
           STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
         run: |
-          npm install -g staticrypt
+          npm install -g staticrypt@latest
           mkdir -p dist
-          staticrypt index.html -p "$STATICRYPT_PASSWORD" -d dist --template-title "IISER Kolkata Campus Radio — Portal Login" --remember 30
+
+          # Encrypt index.html into the dist/ directory
+          npx staticrypt index.html --password "$STATICRYPT_PASSWORD" --output dist/index.html --template-title "IISER Kolkata Campus Radio — Portal Login" --remember 30
+
+          # Verify that dist/index.html was actually generated and has real size
+          if [ ! -s dist/index.html ]; then
+            echo "Error: dist/index.html was not generated properly!"
+            exit 1
+          fi
+
+          echo "File encrypted successfully. Size check:"
+          ls -lh dist/
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
