@@ -10,6 +10,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- CSV Parser & Zip Exporter -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -343,6 +347,14 @@
         .btn-download:disabled {
             opacity: 0.65;
             cursor: not-allowed;
+        }
+
+        .bulk-box {
+            border: 1px dashed #cbd5e1;
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.4rem;
         }
 
         /* Certificate Live Preview Container */
@@ -812,8 +824,27 @@
                             <path
                                 d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
                         </svg>
-                        <span id="btnLabel">Download High-Res PDF Certificate</span>
+                        <span id="btnLabel">Download Single PDF Certificate</span>
                     </button>
+
+                    <!-- BULK ISSUANCE SECTION -->
+                    <div class="form-section-subtitle">⚡ Bulk Issuance Pipeline (CSV Upload)</div>
+                    <div class="bulk-box">
+                        <label for="csvFileInput">Upload Recipient CSV File</label>
+                        <input type="file" id="csvFileInput" accept=".csv" onchange="handleCSVFile(event)">
+                        <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block; line-height: 1.35;">
+                            CSV Columns required: <code>Name</code>, <code>Roll</code> (or <code>College</code>).<br>
+                            Each certificate receives a unique ID, QR, and registers to Firebase.
+                        </span>
+                    </div>
+
+                    <button type="button" class="btn-download" id="bulkBtn" onclick="processBulkCertificates()" style="display: none; background: #0f172a; margin-top: 0.75rem;">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 3a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm10.5 4.5a.75.75 0 00-1.5 0v4.614L9.295 10.235a.75.75 0 10-1.09 1.03l3.25 3.5a.75.75 0 001.09 0l3.25-3.5a.75.75 0 00-1.09-1.03l-1.705 1.879V7.5z" />
+                        </svg>
+                        <span id="bulkBtnLabel">Generate Batch & Download ZIP</span>
+                    </button>
+                    <div id="bulkProgress" style="font-size: 0.8rem; font-weight: 700; color: #ff7556; margin-top: 0.6rem; display: none; text-align: center;"></div>
                 </form>
             </div>
 
@@ -901,8 +932,8 @@
     </main>
 
     <script>
-        // Track generated digits during this session
         let currentRandomDigits = '';
+        let parsedBulkData = [];
 
         function getRandomFourDigits() {
             return Math.floor(1000 + Math.random() * 9000).toString();
@@ -923,7 +954,6 @@
             let candidateId = '';
             let attempts = 0;
 
-            // Roll four random digits and confirm uniqueness against database
             while (!uniqueFound && attempts < 10) {
                 attempts++;
                 currentRandomDigits = getRandomFourDigits();
@@ -942,7 +972,6 @@
         }
 
         function handleDateChange() {
-            // Update year component of certificate number while preserving or rolling fresh digits
             const year = getSelectedYear();
             if (!currentRandomDigits) {
                 currentRandomDigits = getRandomFourDigits();
@@ -1297,7 +1326,7 @@
         async function downloadSignedPDF() {
             const btn = document.getElementById('downloadBtn');
             const btnLabel = document.getElementById('btnLabel');
-            const originalText = btnLabel ? btnLabel.textContent : "Download High-Res PDF Certificate";
+            const originalText = btnLabel ? btnLabel.textContent : "Download Single PDF Certificate";
 
             try {
                 if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
@@ -1353,7 +1382,6 @@
                 pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
                 pdf.save(filename);
 
-                // Auto-generate next serial ready for the next participant
                 setTimeout(generateNewCertId, 300);
             } catch (err) {
                 console.error("PDF Export Error:", err);
@@ -1362,6 +1390,142 @@
                 if (btn) btn.disabled = false;
                 if (btnLabel) btnLabel.textContent = originalText;
             }
+        }
+
+        // CSV PARSING & BATCH PROCESSING PIPELINE
+        function handleCSVFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function (results) {
+                    parsedBulkData = results.data.filter(row => row.Name || row.name || row.NAME);
+                    if (parsedBulkData.length > 0) {
+                        const bulkBtn = document.getElementById('bulkBtn');
+                        const bulkBtnLabel = document.getElementById('bulkBtnLabel');
+                        bulkBtn.style.display = 'flex';
+                        bulkBtnLabel.textContent = `⚡ Generate ${parsedBulkData.length} Certificates (ZIP Archive)`;
+                    } else {
+                        alert("No valid recipient rows found. Ensure CSV columns contain 'Name' and 'Roll' (or 'College').");
+                    }
+                }
+            });
+        }
+
+        async function processBulkCertificates() {
+            if (!parsedBulkData || !parsedBulkData.length) return;
+
+            const bulkBtn = document.getElementById('bulkBtn');
+            const bulkBtnLabel = document.getElementById('bulkBtnLabel');
+            const bulkProgress = document.getElementById('bulkProgress');
+
+            bulkBtn.disabled = true;
+            bulkProgress.style.display = 'block';
+
+            const zip = new JSZip();
+            const certType = document.getElementById('certType').value;
+            const citation = document.getElementById('eventTenure').value;
+            const year = getSelectedYear();
+            const formattedDate = document.getElementById('docIssueDate').textContent;
+
+            for (let i = 0; i < parsedBulkData.length; i++) {
+                const row = parsedBulkData[i];
+                const name = (row.Name || row.name || row.NAME || '').trim();
+                const rawRoll = (row.Roll || row.roll || row.ROLL || row.College || row.college || row.COLLEGE || '').trim();
+
+                bulkProgress.textContent = `Rendering certificate ${i + 1} of ${parsedBulkData.length}: ${name}...`;
+
+                // 1. Generate guaranteed unique ID for this recipient
+                let randomDigits = getRandomFourDigits();
+                let certNum = `IKCR-${year}-${randomDigits}`;
+                if (window.checkCertExists) {
+                    let exists = await window.checkCertExists(certNum);
+                    while (exists) {
+                        randomDigits = getRandomFourDigits();
+                        certNum = `IKCR-${year}-${randomDigits}`;
+                        exists = await window.checkCertExists(certNum);
+                    }
+                }
+
+                // 2. Format Identification text
+                let formattedIdText = '';
+                if (rawRoll) {
+                    formattedIdText = rawRoll.match(/^\d{2}[A-Za-z]{2}\d+$/) ? `Roll Number: ${rawRoll}` : rawRoll;
+                }
+
+                // 3. Update DOM for rendering
+                document.getElementById('docName').textContent = name;
+                document.getElementById('docRoll').textContent = formattedIdText;
+                document.getElementById('docCertId').textContent = certNum;
+
+                // 4. Update QR
+                const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/verify.html');
+                const verifyUrl = `${baseUrl}?id=${encodeURIComponent(certNum)}`;
+                const qrContainer = document.getElementById('certQrCode');
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: verifyUrl,
+                    width: 58,
+                    height: 58,
+                    colorDark: "#111111",
+                    colorLight: "#fbf9f4",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+
+                // Small pause to allow QR code canvas to mount
+                await new Promise(r => setTimeout(r, 60));
+
+                // 5. Compute SHA256 Hash and register to Firestore
+                const auditString = `${certNum}|${name}|${formattedIdText}|${certType}|${formattedDate}|${activeSignatureData1.slice(0, 30)}|${activeSignatureData2.slice(0, 30)}`;
+                const hash = await computeSHA256(auditString);
+
+                if (window.saveCertificateToFirestore) {
+                    await window.saveCertificateToFirestore({
+                        id: certNum,
+                        name: name,
+                        type: certType,
+                        roll: formattedIdText,
+                        citation: citation,
+                        date: formattedDate,
+                        hash: hash,
+                        issuedAt: new Date().toISOString()
+                    });
+                }
+
+                // 6. Render Canvas to PDF
+                const element = document.getElementById('certToExport');
+                const canvasOut = await html2canvas(element, {
+                    scale: 3.0,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: "#fbf9f4",
+                    width: 860,
+                    height: 608,
+                    x: 0,
+                    y: 0,
+                    scrollX: 0,
+                    scrollY: 0
+                });
+
+                const imgData = canvasOut.toDataURL('image/jpeg', 0.95);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
+                pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
+
+                const pdfBlob = pdf.output('blob');
+                const cleanName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
+                zip.file(`${certNum}_${cleanName}.pdf`, pdfBlob);
+            }
+
+            bulkProgress.textContent = "Packaging ZIP archive...";
+            const content = await zip.generateAsync({ type: "blob" });
+            saveAs(content, `IKCR_Certificates_${year}.zip`);
+
+            bulkProgress.textContent = `Completed! ${parsedBulkData.length} certificates registered and exported.`;
+            bulkBtn.disabled = false;
+            generateNewCertId();
         }
 
         function initApp() {
