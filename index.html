@@ -15,6 +15,35 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
+    <!-- Firebase SDK Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIY5X7oUALJjO4CI__wegB0ObnOl6A65Y",
+            authDomain: "ikcr-cert.firebaseapp.com",
+            projectId: "ikcr-cert",
+            storageBucket: "ikcr-cert.firebasestorage.app",
+            messagingSenderId: "541545667157",
+            appId: "1:541545667157:web:64634d526a64bf851092dc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.saveCertificateToFirestore = async function(certData) {
+            try {
+                await setDoc(doc(db, "certificates", certData.id), certData);
+                console.log("Certificate registered successfully in Firestore:", certData.id);
+                return true;
+            } catch (err) {
+                console.error("Firestore Save Error:", err);
+                return false;
+            }
+        };
+    </script>
+
     <style>
         :root {
             --brand-orange: #ff7556;
@@ -487,7 +516,7 @@
             max-width: 580px;
         }
 
-        /* Bottom Row with Date & Dual Signatures (Matching Layout) */
+        /* Bottom Row with Date & Dual Signatures */
         .cert-bottom-row {
             display: flex;
             justify-content: space-between;
@@ -496,7 +525,7 @@
             gap: 1.25rem;
         }
 
-        /* Matching Date Column */
+        /* Date Column */
         .cert-date-col {
             display: flex;
             flex-direction: column;
@@ -1135,18 +1164,33 @@
             const certHashVal = document.getElementById('certHashVal');
             if (certHashVal) certHashVal.textContent = hash;
 
+            // Generate clean URL targeting verify.html with only the ID
+            const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/verify.html');
+            const verifyUrl = `${baseUrl}?id=${encodeURIComponent(certNum)}`;
+
             const qrContainer = document.getElementById('certQrCode');
             if (qrContainer && typeof QRCode !== 'undefined') {
                 qrContainer.innerHTML = '';
                 new QRCode(qrContainer, {
-                    text: certNum,
+                    text: verifyUrl,
                     width: 58,
                     height: 58,
                     colorDark: "#111111",
                     colorLight: "#fbf9f4",
-                    correctLevel: QRCode.CorrectLevel.H
+                    correctLevel: QRCode.CorrectLevel.M
                 });
             }
+
+            return {
+                id: certNum,
+                name: name,
+                type: type,
+                roll: formattedIdText,
+                citation: citation,
+                date: formattedDate,
+                hash: hash,
+                issuedAt: new Date().toISOString()
+            };
         }
 
         async function downloadSignedPDF() {
@@ -1160,14 +1204,19 @@
                 }
 
                 if (btn) btn.disabled = true;
-                if (btnLabel) btnLabel.textContent = "Rendering Ultra-HD PDF...";
+                if (btnLabel) btnLabel.textContent = "Registering & Rendering PDF...";
 
+                const certData = await runPipeline();
+
+                // 1. Save to Firebase Firestore
+                if (window.saveCertificateToFirestore) {
+                    await window.saveCertificateToFirestore(certData);
+                }
+
+                // 2. Render and Export PDF
                 const element = document.getElementById('certToExport');
-                const recipientEl = document.getElementById('recipientName');
-                const certTypeEl = document.getElementById('certType');
-
-                const recipient = (recipientEl && recipientEl.value ? recipientEl.value : 'Volunteer').replace(/[^a-zA-Z0-9_-]/g, '_');
-                const certType = (certTypeEl && certTypeEl.value ? certTypeEl.value : 'Certificate').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const recipient = (certData.name || 'Volunteer').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const certType = (certData.type || 'Certificate').replace(/[^a-zA-Z0-9_-]/g, '_');
                 const filename = `${certType}_${recipient}.pdf`;
 
                 const canvasOut = await html2canvas(element, {
