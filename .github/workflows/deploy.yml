@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - master
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -35,7 +37,7 @@ jobs:
         run: |
           npm install -g staticrypt
           mkdir -p dist
-          staticrypt index.html -p "$STATICRYPT_PASSWORD" -d dist -t "IISER Kolkata Campus Radio — Portal Login" --remember 30
+          staticrypt index.html -p "$STATICRYPT_PASSWORD" -d dist --template-title "IISER Kolkata Campus Radio — Portal Login" --remember 30
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
