@@ -10,28 +10,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts for typography matching -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --brand-orange: #f95724;
-            --brand-orange-dark: #dc3e0f;
-            --brand-dark: #18181b;
-            --brand-slate: #3f3f46;
-            --brand-light: #fafaf9;
+            --brand-orange: #ff7556;
+            --brand-orange-dark: #e85535;
+            --brand-dark: #121214;
             --bg-page: #f4f4f5;
             --bg-card: #ffffff;
             --text-dark: #09090b;
-            --text-muted: #71717a;
             --border: #e4e4e7;
-            --success: #15803d;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
@@ -56,12 +56,6 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-        }
-
-        .header-brand img {
-            height: 38px;
-            width: auto;
-            display: none;
         }
 
         .header-brand h1 {
@@ -93,7 +87,7 @@
         }
 
         main {
-            max-width: 1480px;
+            max-width: 1540px;
             width: 100%;
             margin: 1.5rem auto;
             padding: 0 1.5rem;
@@ -127,8 +121,8 @@
         }
 
         .badge-live {
-            background: rgba(249, 87, 36, 0.1);
-            color: var(--brand-orange);
+            background: rgba(255, 117, 86, 0.15);
+            color: var(--brand-orange-dark);
             padding: 0.2rem 0.5rem;
             border-radius: 4px;
             font-size: 0.72rem;
@@ -278,233 +272,143 @@
             align-items: center;
             margin-bottom: 0.6rem;
             font-size: 0.82rem;
-            color: var(--text-muted);
+            color: #71717a;
         }
 
+        /* EXACT CERTIFICATE FORMAT CONTAINER */
         #certToExport {
             width: 860px;
             height: 608px;
-            background: #ffffff;
-            border: 10px solid #18181b;
-            outline: 3px solid #f95724;
-            outline-offset: -7px;
-            padding: 2.2rem 3rem;
+            background: #fbf9f4; /* Cream white background */
+            border: 2px solid #111111;
+            padding: 0;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-align: center;
             position: relative;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
             box-sizing: border-box;
             overflow: hidden;
         }
 
-        .corner-accent {
+        /* Left Orange Column */
+        .cert-sidebar {
+            width: 190px;
+            height: 100%;
+            background-color: #ff7556;
+            border-right: 2px solid #111111;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 1.2rem;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* 20 / 26 Year Display */
+        .cert-year-badge {
+            width: 54px;
+            height: 84px;
+            background: #ffffff;
+            border-radius: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 0.95;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #111111;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: -1px;
+            z-index: 5;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .cert-sidebar-svg {
             position: absolute;
-            width: 32px;
-            height: 32px;
-            border-color: #f95724;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 2;
         }
 
-        .corner-tl {
-            top: 12px;
-            left: 12px;
-            border-top: 2.5px solid #f95724;
-            border-left: 2.5px solid #f95724;
-        }
-
-        .corner-tr {
-            top: 12px;
-            right: 12px;
-            border-top: 2.5px solid #f95724;
-            border-right: 2.5px solid #f95724;
-        }
-
-        .corner-bl {
-            bottom: 12px;
-            left: 12px;
-            border-bottom: 2.5px solid #f95724;
-            border-left: 2.5px solid #f95724;
-        }
-
-        .corner-br {
-            bottom: 12px;
-            right: 12px;
-            border-bottom: 2.5px solid #f95724;
-            border-right: 2.5px solid #f95724;
-        }
-
-        .cert-watermark-logo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 320px;
-            height: auto;
-            opacity: 0.055;
-            pointer-events: none;
-            user-select: none;
-            z-index: 0;
-            display: none;
-        }
-
-        .cert-top-bar {
+        /* Right Content Pane */
+        .cert-main-content {
+            flex: 1;
+            padding: 1.6rem 2.2rem 1.8rem 2.2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             position: relative;
-            z-index: 1;
+        }
+
+        /* Header with Station & QR */
+        .cert-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .cert-header-left {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 1.25rem;
-            margin-bottom: 0.2rem;
+            gap: 0.9rem;
         }
 
-        .cert-logo-img {
-            height: 64px;
+        .cert-header-logo {
+            height: 56px;
             width: auto;
+            max-width: 80px;
             object-fit: contain;
             display: none;
         }
 
-        .cert-titles-wrapper {
-            text-align: left;
+        .cert-header-station-text {
+            display: flex;
+            flex-direction: column;
         }
 
-        .cert-inst-name {
-            font-size: 0.78rem;
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            color: #52525b;
-            text-transform: uppercase;
-        }
-
-        .cert-station-name {
+        .cert-header-station-text .inst {
+            font-family: 'Special Elite', monospace, sans-serif;
             font-size: 1.35rem;
-            font-weight: 900;
-            letter-spacing: 1.5px;
-            color: var(--brand-dark);
+            font-weight: 700;
+            color: #111111;
+            letter-spacing: 0.5px;
             line-height: 1.1;
         }
 
-        .cert-station-name span {
-            color: var(--brand-orange);
-        }
-
-        .cert-award-type-badge {
-            position: relative;
-            z-index: 1;
-            display: inline-block;
-            margin: 0.5rem auto 0;
-            padding: 0.25rem 2rem;
-            border-top: 1.5px solid var(--brand-orange);
-            border-bottom: 1.5px solid var(--brand-orange);
-        }
-
-        .cert-award-type-badge h2 {
-            font-size: 1.5rem;
-            font-family: Georgia, "Times New Roman", serif;
-            letter-spacing: 1px;
-            color: var(--brand-dark);
-            text-transform: uppercase;
+        .cert-header-station-text .station {
+            font-family: 'Special Elite', monospace, sans-serif;
+            font-size: 1.35rem;
             font-weight: 700;
-        }
-
-        .cert-body {
-            position: relative;
-            z-index: 1;
-            margin: 0.5rem 0;
-        }
-
-        .cert-body .cert-present {
-            font-style: italic;
-            color: #71717a;
-            font-size: 0.88rem;
+            color: #111111;
             letter-spacing: 0.5px;
+            line-height: 1.1;
         }
 
-        .cert-body .cert-name {
-            font-size: 1.85rem;
-            font-weight: 700;
-            color: var(--brand-orange);
-            display: inline-block;
-            padding: 0.15rem 1.8rem;
-            margin: 0.25rem 0;
-            font-family: Georgia, serif;
-            letter-spacing: 0.5px;
-            border-bottom: 1.5px solid #d4d4d8;
+        .cert-header-verify {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
         }
 
-        .cert-body .cert-roll {
+        .cert-header-verify-label {
             font-size: 0.8rem;
-            color: #52525b;
-            font-weight: 600;
-        }
-
-        .cert-body .cert-text {
-            font-size: 0.9rem;
-            line-height: 1.55;
-            color: #27272a;
-            max-width: 650px;
-            margin: 0.5rem auto 0;
-        }
-
-        .cert-footer {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 0.4rem;
-            padding: 0 0.5rem;
-        }
-
-        .footer-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 175px;
-        }
-
-        .sig-container-view {
-            height: 48px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sig-container-view img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
-        }
-
-        .footer-line {
-            width: 100%;
-            border-top: 1.5px solid #18181b;
-            margin-top: 0.2rem;
-        }
-
-        .footer-caption {
-            font-size: 0.72rem;
-            color: #71717a;
-            margin-top: 0.2rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-
-        .qr-audit-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 250px;
+            color: #64748b;
+            text-align: right;
+            line-height: 1.35;
+            max-width: 155px;
+            margin-top: 2px;
+            font-weight: 400;
         }
 
         #certQrCode {
-            width: 52px;
-            height: 52px;
+            width: 68px;
+            height: 68px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -512,19 +416,126 @@
 
         #certQrCode canvas,
         #certQrCode img {
-            width: 52px !important;
-            height: 52px !important;
+            width: 68px !important;
+            height: 68px !important;
             image-rendering: pixelated;
         }
 
-        .qr-audit-box span {
-            font-size: 0.65rem;
-            color: #71717a;
-            margin-top: 0.2rem;
-            font-family: monospace;
+        /* Big Classification Header */
+        .cert-award-type-title {
+            font-family: 'Anton', 'Montserrat', sans-serif;
+            font-size: 2.55rem;
+            font-weight: 900;
+            color: #111111;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 0.4rem;
+            line-height: 1;
+        }
+
+        /* Recipient Section */
+        .cert-recipient-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cert-lead-text {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-weight: 400;
+            margin-bottom: 0.35rem;
+        }
+
+        .cert-recipient-name-wrap {
+            border-top: 1.5px solid #27272a;
+            border-bottom: 1.5px solid #27272a;
+            padding: 0.4rem 0;
+            margin-bottom: 0.45rem;
+        }
+
+        .cert-recipient-name {
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: #09090b;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+        }
+
+        .cert-roll-number {
+            text-align: right;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #27272a;
+            letter-spacing: 0.3px;
+        }
+
+        /* Citation Body */
+        .cert-citation-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #27272a;
+            font-weight: 400;
+            max-width: 580px;
+        }
+
+        /* Bottom Footer Rows */
+        .cert-bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 0.5rem;
+        }
+
+        .cert-date-col {
+            display: flex;
+            flex-direction: column;
+            width: 175px;
+        }
+
+        .cert-date-val {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #111111;
+            padding-bottom: 0.3rem;
+            border-bottom: 1.5px solid #27272a;
+            min-height: 24px;
+        }
+
+        .cert-date-lbl {
+            font-size: 0.88rem;
+            color: #64748b;
+            margin-top: 0.35rem;
+            font-weight: 400;
+        }
+
+        .cert-sign-col {
+            display: flex;
+            flex-direction: column;
+            width: 290px;
+        }
+
+        .cert-sign-slot {
+            height: 48px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1.5px solid #27272a;
+        }
+
+        .cert-sign-slot img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .cert-sign-title {
+            font-size: 0.88rem;
+            color: #64748b;
+            margin-top: 0.35rem;
+            font-weight: 400;
             text-align: center;
-            line-height: 1.2;
-            word-break: break-word;
         }
     </style>
 </head>
@@ -533,7 +544,6 @@
 
     <header>
         <div class="header-brand">
-            <img id="headerLogoImg" alt="Radio Logo">
             <div>
                 <h1>IISER Kolkata Campus Radio</h1>
                 <p>Digital Certificate Authority & Management</p>
@@ -555,15 +565,15 @@
                         <label for="logoUploadInput">Upload Station / Institution Logo</label>
                         <input type="file" id="logoUploadInput" accept="image/png, image/jpeg, image/svg+xml"
                             onchange="handleLogoUpload(event)">
-                        <span style="font-size: 0.72rem; color: #71717a; margin-top: 3px; display: block;">Upload PNG/JPEG to display top logo and central watermark.</span>
+                        <span style="font-size: 0.72rem; color: #71717a; margin-top: 3px; display: block;">Upload PNG/JPEG to display beside station header title.</span>
                     </div>
 
                     <div class="form-group">
                         <label for="certType">Certificate Classification</label>
                         <select id="certType" onchange="runPipeline()">
-                            <option value="Certificate of Participation">Certificate of Participation</option>
-                            <option value="Certificate of Achievement">Certificate of Achievement</option>
-                            <option value="Certificate of Appreciation">Certificate of Appreciation</option>
+                            <option value="CERTIFICATE OF PARTICIPATION">CERTIFICATE OF PARTICIPATION</option>
+                            <option value="CERTIFICATE OF ACHIEVEMENT">CERTIFICATE OF ACHIEVEMENT</option>
+                            <option value="CERTIFICATE OF APPRECIATION">CERTIFICATE OF APPRECIATION</option>
                         </select>
                     </div>
 
@@ -574,28 +584,28 @@
 
                     <div class="form-group">
                         <label for="verifyInstruction">Verify Instruction Text</label>
-                        <input type="text" id="verifyInstruction" value="scan QR code" oninput="runPipeline()">
+                        <input type="text" id="verifyInstruction" value="To verify certificate, scan the QR:" oninput="runPipeline()">
                     </div>
 
                     <div class="form-group">
                         <label for="recipientName">Recipient Volunteer Name</label>
-                        <input type="text" id="recipientName" value="John Doe" oninput="runPipeline()" required>
+                        <input type="text" id="recipientName" value="Rishiraj Chatterjee" oninput="runPipeline()" required>
                     </div>
 
                     <div class="form-group">
                         <label for="recipientRoll">IISER-K Roll Number</label>
-                        <input type="text" id="recipientRoll" value="99MS999" oninput="runPipeline()">
+                        <input type="text" id="recipientRoll" value="25MS191" oninput="runPipeline()">
                     </div>
 
                     <div class="form-group">
                         <label for="eventTenure">Contribution Citation / Tenure</label>
-                        <textarea id="eventTenure" rows="2"
+                        <textarea id="eventTenure" rows="3"
                             oninput="runPipeline()">outstanding broadcast hosting and audio production for 'Science & Beats' during the Academic Year 2025–2026</textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="signatoryTitle">Signatory Title (Leave blank to remove signatory)</label>
-                        <input type="text" id="signatoryTitle" value="Faculty In-Charge / Station Lead"
+                        <input type="text" id="signatoryTitle" value="Faculty In-Charge/ Station Lead"
                             oninput="runPipeline()">
                     </div>
 
@@ -650,59 +660,95 @@
             <div class="preview-pane">
                 <div class="preview-controls">
                     <span>Live Document Layout (A4 Landscape)</span>
-                    <span style="color: var(--brand-orange); font-weight: 600;">● Station Palette Aligned</span>
+                    <span style="color: var(--brand-orange-dark); font-weight: 600;">● Station Palette Aligned</span>
                 </div>
 
+                <!-- Export Document Container -->
                 <div id="certToExport">
-                    <div class="corner-accent corner-tl"></div>
-                    <div class="corner-accent corner-tr"></div>
-                    <div class="corner-accent corner-bl"></div>
-                    <div class="corner-accent corner-br"></div>
-
-                    <!-- Watermark -->
-                    <img id="certWatermarkImg" class="cert-watermark-logo" alt="Watermark">
-
-                    <div class="cert-top-bar">
-                        <!-- Logo -->
-                        <img id="certLogoImg" class="cert-logo-img" alt="IISER Kolkata Campus Radio Logo">
-                        <div class="cert-titles-wrapper">
-                            <div class="cert-station-name">IISER KOLKATA <span>CAMPUS RADIO</span></div>
-                            <div class="cert-inst-name">SAC Building, IISER Kolkata, Mohanpur 741246</div>
+                    <!-- Sidebar Banner with Retro Shapes -->
+                    <div class="cert-sidebar">
+                        <div class="cert-year-badge">
+                            <span id="docYearTop">20</span>
+                            <span id="docYearBottom">26</span>
                         </div>
+                        <!-- Decorative Retro Vector Pattern -->
+                        <svg class="cert-sidebar-svg" viewBox="0 0 190 608" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Star 1 -->
+                            <path d="M135 70 C135 80 145 80 145 80 C145 80 135 80 135 90 C135 80 125 80 125 80 C125 80 135 80 135 70 Z" fill="#2d3748"/>
+                            <!-- White Pill Shapes / Clouds -->
+                            <ellipse cx="140" cy="170" rx="45" ry="68" fill="#ffffff" />
+                            <circle cx="85" cy="225" r="48" fill="#ffffff" />
+                            <ellipse cx="148" cy="390" rx="38" ry="60" fill="#ffffff" />
+                            <ellipse cx="85" cy="580" rx="45" ry="60" fill="#ffffff" />
+                            <ellipse cx="185" cy="800" rx="50" ry="70" fill="#ffffff" />
+                            <circle cx="105" cy="350" r="54" fill="#ffffff" />
+
+                            <!-- Star 2 -->
+                            <path d="M78 240 C78 260 98 260 98 260 C98 260 78 260 78 280 C78 260 58 260 58 260 C58 260 78 260 78 240 Z" fill="#2d3748"/>
+                            
+                            <!-- Star 3 -->
+                            <path d="M245 315 C245 330 260 330 260 330 C260 330 245 330 245 345 C245 330 230 330 230 330 C230 330 245 330 245 315 Z" fill="#2d3748" transform="translate(-100, 0)"/>
+
+                            <!-- Star 4 -->
+                            <path d="M85 530 C85 550 105 550 105 550 C105 550 85 550 85 570 C85 550 65 550 65 550 C65 550 85 550 85 530 Z" fill="#2d3748"/>
+
+                            <!-- Black Oval Wireframes -->
+                            <ellipse cx="120" cy="200" rx="72" ry="120" stroke="#111111" stroke-width="1.8" transform="rotate(-30 120 200)" fill="none"/>
+                            <ellipse cx="78" cy="320" rx="55" ry="105" stroke="#111111" stroke-width="1.8" transform="rotate(35 78 320)" fill="none"/>
+                            <ellipse cx="130" cy="435" rx="55" ry="18" stroke="#111111" stroke-width="1.8" transform="rotate(-8 130 435)" fill="none"/>
+                            <ellipse cx="135" cy="510" rx="55" ry="18" stroke="#111111" stroke-width="1.8" transform="rotate(2 135 510)" fill="none"/>
+                            <ellipse cx="85" cy="625" rx="52" ry="100" stroke="#111111" stroke-width="1.8" transform="rotate(62 85 625)" fill="none"/>
+                        </svg>
                     </div>
 
-                    <div class="cert-award-type-badge">
-                        <h2 id="docCertType">Certificate of Participation</h2>
-                    </div>
-
-                    <div class="cert-body">
-                        <p class="cert-present">This certificate is proudly awarded to</p>
-                        <h3 class="cert-name" id="docName">John Doe</h3>
-                        <p class="cert-roll" id="docRoll">Roll No: 99MS999</p>
-                        <p class="cert-text" id="docCitation">
-                            in sincere recognition of their contribution.
-                        </p>
-                    </div>
-
-                    <div class="cert-footer">
-                        <div class="footer-col" id="colDate">
-                            <span id="docIssueDate" style="font-size: 0.85rem; font-weight: 700; color: #18181b;">15 Aug 2026</span>
-                            <div class="footer-line"></div>
-                            <span class="footer-caption">Date of Issue</span>
-                        </div>
-
-                        <div class="qr-audit-box" id="colQR">
-                            <div id="certQrCode"></div>
-                            <span id="docCertId">ID: CR-2026-9284</span>
-                            <span id="docVerifyText" style="font-size: 0.62rem; color: #71717a; margin-top: 2px;">To verify certificate, scan QR code</span>
-                        </div>
-
-                        <div class="footer-col" id="colSignatory">
-                            <div class="sig-container-view" id="docSigSlot">
-                                <span style="font-size: 0.72rem; color: #a1a1aa; font-style: italic;">[Digital Signature]</span>
+                    <!-- Right Certificate Body -->
+                    <div class="cert-main-content">
+                        <!-- Top Header -->
+                        <div class="cert-header-row">
+                            <div class="cert-header-left">
+                                <img id="certLogoImg" class="cert-header-logo" alt="Campus Radio Logo">
+                                <div class="cert-header-station-text">
+                                    <div class="inst">IISER KOLKATA</div>
+                                    <div class="station">CAMPUS RADIO</div>
+                                </div>
                             </div>
-                            <div class="footer-line"></div>
-                            <span class="footer-caption" id="docSignatoryTitle">Faculty In-Charge / Station Lead</span>
+                            <div class="cert-header-verify">
+                                <div class="cert-header-verify-label" id="docVerifyText">To verify certificate,<br>scan the QR:</div>
+                                <div id="certQrCode"></div>
+                            </div>
+                        </div>
+
+                        <!-- Award Classification Title -->
+                        <div class="cert-award-type-title" id="docCertType">
+                            CERTIFICATE OF PARTICIPATION
+                        </div>
+
+                        <!-- Recipient Name and Roll -->
+                        <div class="cert-recipient-section">
+                            <div class="cert-lead-text">This certificate is proudly awarded to:</div>
+                            <div class="cert-recipient-name-wrap">
+                                <div class="cert-recipient-name" id="docName">Rishiraj Chatterjee</div>
+                            </div>
+                            <div class="cert-roll-number" id="docRoll">Roll Number: 25MS191</div>
+                        </div>
+
+                        <!-- Citation Description -->
+                        <div class="cert-citation-text" id="docCitation">
+                            in sincere recognition of outstanding broadcast hosting and audio production for 'Science & Beats' during the Academic Year 2025–2026
+                        </div>
+
+                        <!-- Signatures & Date Row -->
+                        <div class="cert-bottom-row">
+                            <div class="cert-date-col">
+                                <div class="cert-date-val" id="docIssueDate">01 Sept 2026</div>
+                                <div class="cert-date-lbl">Date of issue</div>
+                            </div>
+                            <div class="cert-sign-col" id="colSignatory">
+                                <div class="cert-sign-slot" id="docSigSlot">
+                                    <span style="font-size: 0.72rem; color: #a1a1aa; font-style: italic;">[Digital Signature]</span>
+                                </div>
+                                <div class="cert-sign-title" id="docSignatoryTitle">Faculty In-Charge/ Station Lead</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -712,12 +758,11 @@
 
     <script>
         function applyLogoData(base64Data) {
-            const wm = document.getElementById('certWatermarkImg');
             const lg = document.getElementById('certLogoImg');
-            const hdr = document.getElementById('headerLogoImg');
-            if (wm) { wm.src = base64Data; wm.style.display = 'block'; }
-            if (lg) { lg.src = base64Data; lg.style.display = 'block'; }
-            if (hdr) { hdr.src = base64Data; hdr.style.display = 'block'; }
+            if (lg) {
+                lg.src = base64Data;
+                lg.style.display = 'block';
+            }
         }
 
         function handleLogoUpload(event) {
@@ -869,7 +914,7 @@
 
             const type = certTypeEl.value;
             const certNum = certNumberEl.value.trim() || 'CR-2026-9284';
-            const verifyText = verifyInstructionEl ? verifyInstructionEl.value.trim() : '';
+            const verifyText = verifyInstructionEl ? verifyInstructionEl.value.trim() : 'To verify certificate, scan the QR:';
             const name = recipientNameEl ? (recipientNameEl.value || 'Recipient Name') : 'Recipient Name';
             const roll = recipientRollEl ? recipientRollEl.value : '';
             const citation = eventTenureEl ? eventTenureEl.value : '';
@@ -880,40 +925,48 @@
             const docName = document.getElementById('docName');
             const docRoll = document.getElementById('docRoll');
             const docCitation = document.getElementById('docCitation');
-            const docCertId = document.getElementById('docCertId');
             const docVerifyText = document.getElementById('docVerifyText');
             const sigCol = document.getElementById('colSignatory');
             const docSignatoryTitle = document.getElementById('docSignatoryTitle');
             const docIssueDate = document.getElementById('docIssueDate');
+            const docYearTop = document.getElementById('docYearTop');
+            const docYearBottom = document.getElementById('docYearBottom');
 
             if (docCertType) docCertType.textContent = type;
             if (docName) docName.textContent = name;
-            if (docRoll) docRoll.textContent = roll ? `Roll No: ${roll}` : '';
+            if (docRoll) docRoll.textContent = roll ? `Roll Number: ${roll}` : '';
             if (docCitation) docCitation.textContent = `in sincere recognition of ${citation}`;
-            if (docCertId) docCertId.textContent = `ID: ${certNum}`;
 
             if (docVerifyText) {
-                docVerifyText.textContent = verifyText ? `To verify certificate, ${verifyText}` : `To verify certificate`;
+                docVerifyText.innerHTML = verifyText.replace(/,\s*/, ',<br>');
             }
 
             if (sigCol) {
                 if (!sigTitle) {
-                    sigCol.style.display = 'none';
+                    sigCol.style.opacity = '0';
                 } else {
-                    sigCol.style.display = 'flex';
+                    sigCol.style.opacity = '1';
                     if (docSignatoryTitle) docSignatoryTitle.textContent = sigTitle;
                 }
             }
 
-            let formattedDate = '15 Aug 2026';
+            let formattedDate = '01 Sept 2026';
+            let yearFull = '2026';
             if (dateVal) {
                 const parts = dateVal.split('-');
                 if (parts.length === 3) {
                     const d = new Date(parts[0], parts[1] - 1, parts[2]);
                     formattedDate = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                    yearFull = parts[0];
                 }
             }
             if (docIssueDate) docIssueDate.textContent = formattedDate;
+
+            // Update badge digits (e.g., 20 and 26)
+            if (yearFull.length === 4) {
+                if (docYearTop) docYearTop.textContent = yearFull.slice(0, 2);
+                if (docYearBottom) docYearBottom.textContent = yearFull.slice(2, 4);
+            }
 
             const auditString = `${certNum}|${name}|${roll}|${type}|${formattedDate}|${activeSignatureData.slice(0, 50)}`;
             const hash = await computeSHA256(auditString);
@@ -925,10 +978,10 @@
                 qrContainer.innerHTML = '';
                 new QRCode(qrContainer, {
                     text: certNum,
-                    width: 128,
-                    height: 128,
-                    colorDark: "#f95724",
-                    colorLight: "#ffffff",
+                    width: 68,
+                    height: 68,
+                    colorDark: "#111111",
+                    colorLight: "#fbf9f4",
                     correctLevel: QRCode.CorrectLevel.H
                 });
             }
@@ -959,7 +1012,7 @@
                     scale: 3.5,
                     useCORS: true,
                     allowTaint: true,
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "#fbf9f4",
                     width: 860,
                     height: 608,
                     x: 0,
@@ -997,7 +1050,6 @@
             runPipeline();
         }
 
-        // Initialize safely once DOM/decryption is complete
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             setTimeout(initApp, 50);
         } else {
