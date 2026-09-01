@@ -36,11 +36,15 @@ jobs:
           STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
         run: |
           mkdir -p dist
-          # If secret is missing, fallback to prevent silent failure
           PASS="${STATICRYPT_PASSWORD:-CampusRadio2026}"
           
-          # Run staticrypt directly
+          # 1. Encrypt only index.html (the admin creation portal)
           npx staticrypt index.html -p "$PASS" -d dist/
+
+          # 2. Copy the public verification page and assets
+          cp verify.html dist/
+          [ -f logo.png ] && cp logo.png dist/
+          [ -f sidebar.png ] && cp sidebar.png dist/
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
