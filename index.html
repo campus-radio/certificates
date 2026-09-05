@@ -618,7 +618,7 @@
             line-height: 1.2;
         }
 
-        /* Dual Signatures Container */
+        /* Dual Signatories Container */
         .cert-signatories-wrapper {
             display: flex;
             gap: 1.25rem;
@@ -719,7 +719,7 @@
 
                     <div class="form-group">
                         <label for="recipientName">Recipient Volunteer Name</label>
-                        <input type="text" id="recipientName" value="Rishiraj Chatterjee" oninput="runPipeline()" required>
+                        <input type="text" id="recipientName" value="Rishav Kumar Singh" oninput="runPipeline()" required>
                     </div>
 
                     <!-- Participant Identifier (Roll Number or College Name) -->
@@ -731,7 +731,7 @@
                                 <option value="college">College / Institute</option>
                                 <option value="custom">Custom Prefix</option>
                             </select>
-                            <input type="text" id="recipientIdVal" value="25MS191" oninput="runPipeline()" placeholder="Enter roll or college name">
+                            <input type="text" id="recipientIdVal" value="22MS076" oninput="runPipeline()" placeholder="Enter roll or college name">
                         </div>
                     </div>
 
@@ -834,7 +834,7 @@
                         <input type="file" id="csvFileInput" accept=".csv" onchange="handleCSVFile(event)">
                         <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block; line-height: 1.35;">
                             CSV Columns required: <code>Name</code>, <code>Roll</code> (or <code>College</code>).<br>
-                            Each certificate receives a unique ID, QR, and registers to Firebase.
+                            PDF file names will format as <code>initialsroll@iiserkol.ac.in.pdf</code>.
                         </span>
                     </div>
 
@@ -892,9 +892,9 @@
                         <div class="cert-recipient-section">
                             <div class="cert-lead-text">This certificate is proudly awarded to:</div>
                             <div class="cert-recipient-name-wrap">
-                                <div class="cert-recipient-name" id="docName">Rishiraj Chatterjee</div>
+                                <div class="cert-recipient-name" id="docName">Rishav Kumar Singh</div>
                             </div>
-                            <div class="cert-roll-number" id="docRoll">Roll Number: 25MS191</div>
+                            <div class="cert-roll-number" id="docRoll">Roll Number: 22MS076</div>
                         </div>
 
                         <!-- Citation Description -->
@@ -934,6 +934,28 @@
     <script>
         let currentRandomDigits = '';
         let parsedBulkData = [];
+
+        // Exact official verification URL base
+        const OFFICIAL_VERIFY_BASE_URL = 'https://www.iiserkol.ac.in/~radiok/admin/verify.html';
+
+        // Filename generator: initials + rollnumber + @iiserkol.ac.in
+        function formatPdfFilename(name, rollOrCollege) {
+            const cleanName = (name || '').trim();
+            const words = cleanName.split(/\s+/).filter(w => w.length > 0);
+            const initials = words.map(w => w[0].toLowerCase()).join('');
+
+            // Extract alphanumeric roll/id string, ignoring "Roll Number:" label
+            let rawId = (rollOrCollege || '').replace(/^Roll Number:\s*/i, '').trim().toLowerCase();
+            rawId = rawId.replace(/[^a-z0-9]/g, '');
+
+            if (initials && rawId) {
+                return `${initials}${rawId}@iiserkol.ac.in.pdf`;
+            } else if (rawId) {
+                return `${rawId}@iiserkol.ac.in.pdf`;
+            } else {
+                return `${cleanName.replace(/[^a-zA-Z0-9_-]/g, '_')}@iiserkol.ac.in.pdf`;
+            }
+        }
 
         function getRandomFourDigits() {
             return Math.floor(1000 + Math.random() * 9000).toString();
@@ -1024,13 +1046,13 @@
             if (!select || !input) return;
 
             if (select.value === 'roll') {
-                input.placeholder = 'e.g., 25MS191';
+                input.placeholder = 'e.g., 22MS076';
                 if (!input.value || input.value.includes('IISER') || input.value.includes('College')) {
-                    input.value = '25MS191';
+                    input.value = '22MS076';
                 }
             } else if (select.value === 'college') {
                 input.placeholder = 'e.g., IISER Kolkata / St. Xavier\'s College';
-                if (!input.value || input.value === '25MS191') {
+                if (!input.value || input.value === '22MS076') {
                     input.value = 'IISER Kolkata';
                 }
             } else if (select.value === 'custom') {
@@ -1294,9 +1316,8 @@
             const certHashVal = document.getElementById('certHashVal');
             if (certHashVal) certHashVal.textContent = hash;
 
-            // Generate clean URL targeting verify.html with only the unique ID
-            const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/verify.html');
-            const verifyUrl = `${baseUrl}?id=${encodeURIComponent(certNum)}`;
+            // Target https://www.iiserkol.ac.in/~radiok/admin/verify.html
+            const verifyUrl = `${OFFICIAL_VERIFY_BASE_URL}?id=${encodeURIComponent(certNum)}`;
 
             const qrContainer = document.getElementById('certQrCode');
             if (qrContainer && typeof QRCode !== 'undefined') {
@@ -1316,6 +1337,7 @@
                 name: name,
                 type: type,
                 roll: formattedIdText,
+                rawRoll: rawId,
                 citation: citation,
                 date: formattedDate,
                 hash: hash,
@@ -1336,7 +1358,6 @@
                 if (btn) btn.disabled = true;
                 if (btnLabel) btnLabel.textContent = "Registering & Rendering PDF...";
 
-                // Ensure final uniqueness check before saving
                 let certData = await runPipeline();
                 if (window.checkCertExists) {
                     const exists = await window.checkCertExists(certData.id);
@@ -1351,11 +1372,9 @@
                     await window.saveCertificateToFirestore(certData);
                 }
 
-                // 2. Render and Export PDF
+                // 2. Render and Export PDF with initialsrollnumber@iiserkol.ac.in format
                 const element = document.getElementById('certToExport');
-                const recipient = (certData.name || 'Volunteer').replace(/[^a-zA-Z0-9_-]/g, '_');
-                const certType = (certData.type || 'Certificate').replace(/[^a-zA-Z0-9_-]/g, '_');
-                const filename = `${certType}_${recipient}.pdf`;
+                const filename = formatPdfFilename(certData.name, certData.roll || certData.rawRoll);
 
                 const canvasOut = await html2canvas(element, {
                     scale: 3.5,
@@ -1460,9 +1479,8 @@
                 document.getElementById('docRoll').textContent = formattedIdText;
                 document.getElementById('docCertId').textContent = certNum;
 
-                // 4. Update QR
-                const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/verify.html');
-                const verifyUrl = `${baseUrl}?id=${encodeURIComponent(certNum)}`;
+                // 4. Update QR with official IISER-K domain
+                const verifyUrl = `${OFFICIAL_VERIFY_BASE_URL}?id=${encodeURIComponent(certNum)}`;
                 const qrContainer = document.getElementById('certQrCode');
                 qrContainer.innerHTML = '';
                 new QRCode(qrContainer, {
@@ -1474,7 +1492,6 @@
                     correctLevel: QRCode.CorrectLevel.M
                 });
 
-                // Small pause to allow QR code canvas to mount
                 await new Promise(r => setTimeout(r, 60));
 
                 // 5. Compute SHA256 Hash and register to Firestore
@@ -1515,8 +1532,8 @@
                 pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
 
                 const pdfBlob = pdf.output('blob');
-                const cleanName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
-                zip.file(`${certNum}_${cleanName}.pdf`, pdfBlob);
+                const filename = formatPdfFilename(name, rawRoll);
+                zip.file(filename, pdfBlob);
             }
 
             bulkProgress.textContent = "Packaging ZIP archive...";
